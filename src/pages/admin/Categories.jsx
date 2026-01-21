@@ -3,12 +3,10 @@ import { getCategories, createCategory } from "../../api/category.api";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
-
   const [form, setForm] = useState({
     categoryName: "",
     description: "",
   });
-
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -25,14 +23,20 @@ export default function AdminCategories() {
     e.preventDefault();
     setError("");
 
-    // ✅ FRONTEND VALIDATION
-    if (!form.categoryName.trim()) {
-      setError("Category name is required");
+    const name = form.categoryName.trim();
+
+    if (!name || !form.description.trim()) {
+      setError("All fields are required");
       return;
     }
 
-    if (!form.description.trim()) {
-      setError("Category description is required");
+    // ✅ FRONTEND DUPLICATE CHECK
+    const alreadyExists = categories.some(
+      (c) => c.categoryName.toLowerCase() === name.toLowerCase()
+    );
+
+    if (alreadyExists) {
+      setError("Category already exists");
       return;
     }
 
@@ -40,7 +44,7 @@ export default function AdminCategories() {
 
     try {
       await createCategory({
-        categoryName: form.categoryName.trim(),
+        categoryName: name,
         description: form.description.trim(),
       });
 
@@ -58,22 +62,12 @@ export default function AdminCategories() {
   return (
     <div className="space-y-6">
 
-      {/* HEADER */}
-      <div>
-        <h2 className="text-lg font-semibold">Categories</h2>
-        <p className="text-xs text-gray-500">
-          Manage product categories
-        </p>
-      </div>
+      <h2 className="text-lg font-semibold">Categories</h2>
 
-      {/* CREATE CATEGORY FORM */}
       <form
         onSubmit={handleSubmit}
         className="bg-white border rounded-lg p-4 space-y-4 max-w-lg"
       >
-        <h3 className="font-medium">Add New Category</h3>
-
-        {/* ERROR */}
         {error && (
           <div className="text-xs bg-red-100 text-red-600 p-2 rounded">
             {error}
@@ -81,9 +75,8 @@ export default function AdminCategories() {
         )}
 
         <input
-          type="text"
-          placeholder="Category Name"
           className="input"
+          placeholder="Category Name"
           value={form.categoryName}
           onChange={(e) =>
             setForm({ ...form, categoryName: e.target.value })
@@ -91,8 +84,8 @@ export default function AdminCategories() {
         />
 
         <textarea
-          placeholder="Description"
           className="input"
+          placeholder="Description"
           rows="3"
           value={form.description}
           onChange={(e) =>
@@ -105,41 +98,24 @@ export default function AdminCategories() {
           disabled={loading}
           className="btn-primary disabled:opacity-50"
         >
-          {loading ? "Saving..." : "Create Category"}
+          {loading ? "Creating..." : "Create Category"}
         </button>
       </form>
 
-      {/* CATEGORY LIST */}
-      <div className="bg-white border rounded-lg overflow-x-auto">
+      {/* LIST */}
+      <div className="bg-white border rounded-lg">
         <table className="w-full text-sm">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-3 text-left">Category Name</th>
-              <th className="p-3 text-left">Description</th>
+              <th className="p-3 text-left">Category</th>
+              <th>Description</th>
             </tr>
           </thead>
-
           <tbody>
-            {categories.length === 0 && (
-              <tr>
-                <td
-                  colSpan="2"
-                  className="text-center text-sm text-gray-500 p-4"
-                >
-                  No categories found
-                </td>
-              </tr>
-            )}
-
-            {categories.map((cat) => (
-              <tr
-                key={cat._id}
-                className="border-t hover:bg-gray-50"
-              >
-                <td className="p-3 font-medium">
-                  {cat.categoryName}
-                </td>
-                <td>{cat.description}</td>
+            {categories.map((c) => (
+              <tr key={c._id} className="border-t">
+                <td className="p-3 font-medium">{c.categoryName}</td>
+                <td>{c.description}</td>
               </tr>
             ))}
           </tbody>

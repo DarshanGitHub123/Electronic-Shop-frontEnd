@@ -9,8 +9,7 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🆕 Inventory status per order
-  // { orderId: { productId: "Available" | "Out of Stock" } }
+  // { orderId: { productId: "Available" | "Out of Stock" | "Error" } }
   const [inventoryStatus, setInventoryStatus] = useState({});
 
   const loadOrders = async () => {
@@ -33,20 +32,18 @@ export default function AdminOrders() {
     loadOrders();
   };
 
-  // 🆕 CHECK INVENTORY FUNCTION
+  // ✅ INVENTORY CHECK
   const checkInventory = async (order) => {
     const statusMap = {};
 
     for (const item of order.items) {
       try {
         const res = await getProductById(item.product._id);
-        const availableStock = res.data.stock;
-
         statusMap[item.product._id] =
-          availableStock >= item.quantity
+          res.data.stock >= item.quantity
             ? "Available"
             : "Out of Stock";
-      } catch (err) {
+      } catch {
         statusMap[item.product._id] = "Error";
       }
     }
@@ -62,7 +59,7 @@ export default function AdminOrders() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {orders.map((order) => (
         <div
           key={order._id}
@@ -103,12 +100,46 @@ export default function AdminOrders() {
             </p>
           </div>
 
+          {/* DELIVERY LOCATION */}
+          <div className="border-t pt-3 text-sm">
+            <p className="font-medium mb-1">Delivery Address</p>
+            <p className="text-xs text-gray-700 leading-5">
+              {order.location?.addressLine1},{" "}
+              {order.location?.addressLine2},{" "}
+              {order.location?.addressLine3}
+              <br />
+              {order.location?.street}, {order.location?.city}
+              <br />
+              {order.location?.state}, {order.location?.country} –{" "}
+              {order.location?.postalCode}
+            </p>
+          </div>
+
+          {/* PAYMENT DETAILS */}
+          <div className="border-t pt-3 text-sm flex flex-col sm:flex-row sm:justify-between gap-2">
+            <p>
+              <strong>Payment Method:</strong>{" "}
+              {order.paymentDetails?.method}
+            </p>
+            <p>
+              <strong>Payment Status:</strong>{" "}
+              <span
+                className={`text-xs px-2 py-1 rounded ml-1
+                  ${
+                    order.paymentDetails?.status === "Paid"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+              >
+                {order.paymentDetails?.status}
+              </span>
+            </p>
+          </div>
+
           {/* ITEMS + INVENTORY */}
           <div className="border-t pt-3">
             <div className="flex justify-between items-center mb-2">
               <p className="text-sm font-medium">Items</p>
-
-              {/* 🆕 CHECK INVENTORY BUTTON */}
               <button
                 onClick={() => checkInventory(order)}
                 className="text-xs bg-indigo-600 text-white px-3 py-1 rounded"
@@ -135,7 +166,6 @@ export default function AdminOrders() {
                       ₹{item.product?.price * item.quantity}
                     </span>
 
-                    {/* 🆕 INVENTORY STATUS BADGE */}
                     {status && (
                       <span
                         className={`text-xs px-2 py-1 rounded

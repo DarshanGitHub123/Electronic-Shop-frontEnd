@@ -14,6 +14,9 @@ export default function AdminProducts() {
   // 🔍 SEARCH
   const [search, setSearch] = useState("");
 
+  const [images, setImages] = useState([]);
+
+
   // ✏️ EDIT MODE
   const [editId, setEditId] = useState(null);
 
@@ -57,29 +60,33 @@ export default function AdminProducts() {
   // ---- SUBMIT (CREATE / UPDATE) ----
   const submitProduct = async (e) => {
     e.preventDefault();
-
+  
     const specifications = {};
     specs.forEach((s) => {
       if (s.key && s.value) specifications[s.key] = s.value;
     });
-
-    const payload = {
+  
+    const formData = new FormData();
+  
+    Object.entries({
       ...form,
       price: Number(form.price),
       stock: Number(form.stock),
-      images: form.images.split(",").map((i) => i.trim()),
-      specifications,
-    };
-
+      specifications: JSON.stringify(specifications),
+    }).forEach(([k, v]) => formData.append(k, v));
+  
+    images.forEach((img) => formData.append("images", img));
+  
     if (editId) {
-      await updateProduct(editId, payload);
+      await updateProduct(editId, formData);
     } else {
-      await createProduct(payload);
+      await createProduct(formData);
     }
-
+  
     resetForm();
     loadData();
   };
+  
 
   const resetForm = () => {
     setEditId(null);
@@ -150,6 +157,7 @@ export default function AdminProducts() {
           }
         />
 
+
         <div className="grid grid-cols-2 gap-3">
           <input
             type="number"
@@ -184,11 +192,13 @@ export default function AdminProducts() {
         </select>
 
         <input
+          type="file"
+          multiple
+          accept="image/*"
           className="input"
-          placeholder="Image URLs (comma separated)"
-          value={form.images}
-          onChange={(e) => setForm({ ...form, images: e.target.value })}
+          onChange={(e) => setImages([...e.target.files])}
         />
+
 
         {/* SPECIFICATIONS */}
         <div>
