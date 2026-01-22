@@ -106,6 +106,8 @@ export default function AdminOrders() {
                   ${
                     order.status === "Pending"
                       ? "bg-yellow-500/20 text-yellow-300"
+                      : order.status === "OutForDelivery"
+                      ? "bg-blue-500/20 text-blue-300"
                       : order.status === "Delivered"
                       ? "bg-green-500/20 text-green-300"
                       : "bg-red-500/20 text-red-300"
@@ -127,6 +129,21 @@ export default function AdminOrders() {
                 {order.user?.email}
               </p>
             </div>
+
+            {/* ✅ DELIVERY BOY (ONLY FOR OUTFORDELIVERY & DELIVERED) */}
+            {(order.status === "OutForDelivery" ||
+              order.status === "Delivered") && (
+              <div className="border-t border-white/10 pt-3 text-sm">
+                <p>
+                  <span className="text-white/60">
+                    Delivery Agent:
+                  </span>{" "}
+                  <span className="font-medium text-white">
+                    {order.deleveryAgent}
+                  </span>
+                </p>
+              </div>
+            )}
 
             {/* DELIVERY ADDRESS */}
             <div className="border-t border-white/10 pt-3 text-sm">
@@ -238,7 +255,12 @@ export default function AdminOrders() {
 
             {/* ACTIONS */}
             <div className="border-t border-white/10 pt-3 flex flex-wrap gap-2">
-              {["Pending", "Delivered", "Rejected"].map((s) => (
+              {[
+                "Pending",
+                "OutForDelivery",
+                "Delivered",
+                "Rejected",
+              ].map((s) => (
                 <button
                   key={s}
                   onClick={() =>

@@ -18,14 +18,14 @@ export default function AdminProducts() {
   const [loading, setLoading] = useState(true);
 
   const [recommended, setRecommended] = useState([]);
-  const [showRecommendedDropdown, setShowRecommendedDropdown] =
-    useState(false);
+  const [showRecommendedDropdown, setShowRecommendedDropdown] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
     description: "",
     price: "",
     stock: "",
+    tax: "",           // ✅ NEW
     category: "",
   });
 
@@ -58,9 +58,6 @@ export default function AdminProducts() {
     );
   }, [search, allProducts]);
 
-  /* ===============================
-     REFRESH PRODUCTS
-     =============================== */
   const refreshProducts = async () => {
     const res = await getProducts();
     setAllProducts(res.data);
@@ -111,6 +108,7 @@ export default function AdminProducts() {
       ...form,
       price: Number(form.price),
       stock: Number(form.stock),
+      tax: Number(form.tax),                 // ✅ SEND TAX
       specifications: JSON.stringify(specifications),
     }).forEach(([k, v]) => formData.append(k, v));
 
@@ -139,12 +137,12 @@ export default function AdminProducts() {
       description: "",
       price: "",
       stock: "",
+      tax: "",          // ✅ RESET TAX
       category: "",
     });
     setImages([]);
     setSpecs([{ key: "", value: "" }]);
     setRecommended([]);
-    setShowRecommendedDropdown(false);
   };
 
   /* ===============================
@@ -152,11 +150,13 @@ export default function AdminProducts() {
      =============================== */
   const editProduct = (p) => {
     setEditId(p._id);
+
     setForm({
       name: p.name,
       description: p.description || "",
       price: p.price,
       stock: p.stock,
+      tax: p.tax ?? "",                 // ✅ PREFILL TAX
       category: p.category?._id || p.category,
     });
 
@@ -194,6 +194,7 @@ export default function AdminProducts() {
           {editId ? "Edit Product" : "Add New Product"}
         </h2>
 
+        {/* BASIC INFO */}
         <input
           className="glass-input"
           placeholder="Product Name *"
@@ -214,7 +215,8 @@ export default function AdminProducts() {
           }
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* PRICE / STOCK / TAX */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <input
             type="number"
             className="glass-input"
@@ -232,6 +234,16 @@ export default function AdminProducts() {
             value={form.stock}
             onChange={(e) =>
               setForm({ ...form, stock: e.target.value })
+            }
+            required
+          />
+          <input
+            type="number"
+            className="glass-input"
+            placeholder="Tax (%)"
+            value={form.tax}
+            onChange={(e) =>
+              setForm({ ...form, tax: e.target.value })
             }
             required
           />
@@ -269,50 +281,7 @@ export default function AdminProducts() {
           onChange={(e) => setImages([...e.target.files])}
         />
 
-        {/* SPECIFICATIONS */}
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-white/80">
-            Specifications
-          </h3>
-
-          {specs.map((s, i) => (
-            <div key={i} className="flex gap-2">
-              <input
-                className="glass-input"
-                placeholder="Key"
-                value={s.key}
-                onChange={(e) =>
-                  updateSpec(i, "key", e.target.value)
-                }
-              />
-              <input
-                className="glass-input"
-                placeholder="Value"
-                value={s.value}
-                onChange={(e) =>
-                  updateSpec(i, "value", e.target.value)
-                }
-              />
-              <button
-                type="button"
-                onClick={() => removeSpecRow(i)}
-                className="text-red-400"
-              >
-                ✕
-              </button>
-            </div>
-          ))}
-
-          <button
-            type="button"
-            onClick={addSpecRow}
-            className="text-xs text-indigo-300"
-          >
-            + Add Specification
-          </button>
-        </div>
-
-        {/* RECOMMENDED PRODUCTS – NEW STYLE */}
+        {/* RECOMMENDED PRODUCTS */}
         <div className="space-y-2 relative">
           <h3 className="text-sm font-medium text-white/80">
             Recommended Products
@@ -321,36 +290,35 @@ export default function AdminProducts() {
           <button
             type="button"
             onClick={() =>
-              setShowRecommendedDropdown((prev) => !prev)
+              setShowRecommendedDropdown((p) => !p)
             }
-            className="glass-input flex justify-between items-center text-white"
+            className="glass-input flex justify-between text-white"
           >
-            {recommended.length > 0
-              ? `${recommended.length} product(s) selected`
+            {recommended.length
+              ? `${recommended.length} selected`
               : "Select recommended products"}
-            <span className="text-xs">▼</span>
+            ▼
           </button>
 
           {showRecommendedDropdown && (
             <div className="absolute z-20 w-full bg-[#0B1C2D] border border-white/10 rounded-2xl shadow-xl mt-1 max-h-64 overflow-y-auto">
-              <ul className="p-2 text-sm font-medium text-body">
+              <ul className="p-2 text-sm">
                 {allProducts
                   .filter((p) => p._id !== editId)
                   .map((p) => (
                     <li key={p._id}>
                       <div
-                        className="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium rounded cursor-pointer"
                         onClick={() => toggleRecommended(p._id)}
+                        className="flex items-center gap-2 p-2 rounded hover:bg-white/10 cursor-pointer"
                       >
                         <input
                           type="checkbox"
                           checked={recommended.includes(p._id)}
                           readOnly
-                          className="w-4 h-4 border border-default-strong rounded-xs bg-neutral-secondary-strong focus:ring-2 focus:ring-brand-soft"
                         />
-                        <label className="ms-2 text-sm font-medium text-heading">
+                        <span className="text-white">
                           {p.name}
-                        </label>
+                        </span>
                       </div>
                     </li>
                   ))}
@@ -359,6 +327,7 @@ export default function AdminProducts() {
           )}
         </div>
 
+        {/* SUBMIT */}
         <button className="btn-primary w-full">
           {editId ? "Update Product" : "Save Product"}
         </button>
@@ -388,6 +357,7 @@ export default function AdminProducts() {
                 <th className="p-4 text-left">Name</th>
                 <th>Price</th>
                 <th>Stock</th>
+                <th>Tax</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -397,6 +367,7 @@ export default function AdminProducts() {
                   <td className="p-4 font-medium">{p.name}</td>
                   <td>₹{p.price}</td>
                   <td>{p.stock}</td>
+                  <td>{p.tax}%</td>
                   <td className="flex gap-2 p-2">
                     <button
                       onClick={() => editProduct(p)}
@@ -418,7 +389,7 @@ export default function AdminProducts() {
 
               {filteredProducts.length === 0 && (
                 <tr>
-                  <td colSpan="4" className="p-6 text-center text-white/60">
+                  <td colSpan="5" className="p-6 text-center text-white/60">
                     No matching products
                   </td>
                 </tr>
@@ -427,7 +398,6 @@ export default function AdminProducts() {
           </table>
         )}
       </div>
-
     </div>
   );
 }

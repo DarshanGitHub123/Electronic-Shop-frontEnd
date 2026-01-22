@@ -18,6 +18,7 @@ import AdminProducts from "./pages/admin/Products";
 import AdminCategories from "./pages/admin/Categories";
 import AdminOrders from "./pages/admin/Orders";
 import AdminUsers from "./pages/admin/Users";
+import Billings from "./pages/admin/Billings";
 
 export default function App() {
   return (
@@ -50,6 +51,7 @@ export default function App() {
               <Route path="categories" element={<AdminCategories />} />
               <Route path="products" element={<AdminProducts />} />
               <Route path="orders" element={<AdminOrders />} />
+              <Route path="billings" element={<Billings />} />
               <Route path="users" element={<AdminUsers />} />
             </Route>
 
