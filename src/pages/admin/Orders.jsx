@@ -70,7 +70,7 @@ export default function AdminOrders() {
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
           <PackageCheck size={20} />
         </div>
-        <h1 className="text-xl font-semibold tracking-wide text-white">
+        <h1 className="text-xl font-semibold tracking-wide">
           Orders
         </h1>
       </div>

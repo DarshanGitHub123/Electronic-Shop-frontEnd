@@ -67,7 +67,7 @@ export default function AdminCategories() {
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
           <Layers size={20} />
         </div>
-        <h1 className="text-xl font-semibold tracking-wide text-white">
+        <h1 className="text-xl font-semibold tracking-wide">
           Categories
         </h1>
       </div>
@@ -182,7 +182,7 @@ export default function AdminCategories() {
                 key={c._id}
                 className="border-t border-white/10 hover:bg-white/5 transition"
               >
-                <td className="p-4 font-medium text-white">
+                <td className="p-4 font-medium">
                   {c.categoryName}
                 </td>
                 <td className="text-white/80">

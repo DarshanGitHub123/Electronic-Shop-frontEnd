@@ -66,7 +66,7 @@ export default function Dashboard() {
 
       {/* PAGE HEADER */}
       <div>
-        <h1 className="text-xl font-semibold tracking-wide text-white">
+        <h1 className="text-xl font-semibold tracking-wide">
           Dashboard Analytics
         </h1>
         <p className="text-sm text-white/60">

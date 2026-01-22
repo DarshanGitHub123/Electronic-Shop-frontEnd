@@ -113,7 +113,7 @@ export default function AdminProducts() {
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
           <PackagePlus size={20} />
         </div>
-        <h1 className="text-xl font-semibold tracking-wide text-white">
+        <h1 className="text-xl font-semibold tracking-wide">
           Products
         </h1>
       </div>
@@ -345,9 +345,9 @@ export default function AdminProducts() {
           <thead className="text-white/70">
             <tr>
               <th className="p-4 text-left">Name</th>
-              <th className="p-4 text-left">Price</th>
-              <th className="p-4 text-left">Stock</th>
-              <th className="p-4 text-left">Action</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -356,9 +356,9 @@ export default function AdminProducts() {
                 key={p._id}
                 className="border-t border-white/10 hover:bg-white/5 transition"
               >
-                <td className="p-4 font-medium text-white">{p.name}</td>
-                <td className="text-white">₹{p.price}</td>
-                <td className="text-white">{p.stock}</td>
+                <td className="p-4 font-medium">{p.name}</td>
+                <td>₹{p.price}</td>
+                <td>{p.stock}</td>
                 <td className="flex gap-2 p-2">
                   <button
                     onClick={() => editProduct(p)}
@@ -370,7 +370,7 @@ export default function AdminProducts() {
                     onClick={() =>
                       deleteProduct(p._id).then(loadData)
                     }
-                    className="bg-red-500 text-white text-xs  px-4 py-2 rounded-md"
+                    className="text-red-400 text-xs"
                   >
                     Delete
                   </button>

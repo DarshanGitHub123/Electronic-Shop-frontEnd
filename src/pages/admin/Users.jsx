@@ -44,7 +44,7 @@ export default function AdminUsers() {
           <Users size={20} />
         </div>
         <div>
-          <h1 className="text-xl font-semibold tracking-wide text-white">
+          <h1 className="text-xl font-semibold tracking-wide">
             Customers
           </h1>
           <p className="text-xs text-white/60">
@@ -94,10 +94,10 @@ export default function AdminUsers() {
                   transition
                 "
               >
-                <td className="p-4 font-medium text-white">
+                <td className="p-4 font-medium">
                   {user.name}
                 </td>
-                <td className="text-white/80 text-white">
+                <td className="text-white/80">
                   {user.email}
                 </td>
                 <td>

@@ -34,9 +34,9 @@ export default function AdminSidebar() {
       {/* LOGO / TITLE */}
       <div className="flex items-center justify-center md:justify-start gap-2 px-2">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center font-bold">
-          E
+          S
         </div>
-        <span className="hidden md:block text-lg font-semibold tracking-wide text-white">
+        <span className="hidden md:block text-lg font-semibold tracking-wide">
           Admin Panel
         </span>
       </div>
