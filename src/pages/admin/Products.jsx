@@ -18,6 +18,8 @@ export default function AdminProducts() {
   const [loading, setLoading] = useState(true);
 
   const [recommended, setRecommended] = useState([]);
+  const [showRecommendedDropdown, setShowRecommendedDropdown] =
+    useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -30,7 +32,7 @@ export default function AdminProducts() {
   const [specs, setSpecs] = useState([{ key: "", value: "" }]);
 
   /* ===============================
-     LOAD INITIAL DATA (ONCE)
+     LOAD INITIAL DATA
      =============================== */
   useEffect(() => {
     const loadInitialData = async () => {
@@ -57,7 +59,7 @@ export default function AdminProducts() {
   }, [search, allProducts]);
 
   /* ===============================
-     REFRESH PRODUCTS AFTER CRUD
+     REFRESH PRODUCTS
      =============================== */
   const refreshProducts = async () => {
     const res = await getProducts();
@@ -79,6 +81,17 @@ export default function AdminProducts() {
 
   const removeSpecRow = (index) => {
     setSpecs(specs.filter((_, i) => i !== index));
+  };
+
+  /* ===============================
+     RECOMMENDED HANDLER
+     =============================== */
+  const toggleRecommended = (productId) => {
+    setRecommended((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
   };
 
   /* ===============================
@@ -131,6 +144,7 @@ export default function AdminProducts() {
     setImages([]);
     setSpecs([{ key: "", value: "" }]);
     setRecommended([]);
+    setShowRecommendedDropdown(false);
   };
 
   /* ===============================
@@ -138,7 +152,6 @@ export default function AdminProducts() {
      =============================== */
   const editProduct = (p) => {
     setEditId(p._id);
-
     setForm({
       name: p.name,
       description: p.description || "",
@@ -181,7 +194,6 @@ export default function AdminProducts() {
           {editId ? "Edit Product" : "Add New Product"}
         </h2>
 
-        {/* BASIC INFO */}
         <input
           className="glass-input"
           placeholder="Product Name *"
@@ -202,7 +214,6 @@ export default function AdminProducts() {
           }
         />
 
-        {/* PRICE & STOCK */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input
             type="number"
@@ -301,36 +312,51 @@ export default function AdminProducts() {
           </button>
         </div>
 
-        {/* RECOMMENDED PRODUCTS */}
-        <div className="space-y-2">
+        {/* RECOMMENDED PRODUCTS – NEW STYLE */}
+        <div className="space-y-2 relative">
           <h3 className="text-sm font-medium text-white/80">
             Recommended Products
           </h3>
 
-          <select
-            multiple
-            value={recommended}
-            onChange={(e) =>
-              setRecommended(
-                Array.from(e.target.selectedOptions).map(
-                  (opt) => opt.value
-                )
-              )
+          <button
+            type="button"
+            onClick={() =>
+              setShowRecommendedDropdown((prev) => !prev)
             }
-            className="glass-input bg-white/15 text-white border border-white/30 rounded-xl h-40"
+            className="glass-input flex justify-between items-center text-white"
           >
-            {allProducts
-              .filter((p) => p._id !== editId)
-              .map((p) => (
-                <option
-                  key={p._id}
-                  value={p._id}
-                  className="bg-gray-900 text-white"
-                >
-                  {p.name}
-                </option>
-              ))}
-          </select>
+            {recommended.length > 0
+              ? `${recommended.length} product(s) selected`
+              : "Select recommended products"}
+            <span className="text-xs">▼</span>
+          </button>
+
+          {showRecommendedDropdown && (
+            <div className="absolute z-20 w-full bg-[#0B1C2D] border border-white/10 rounded-2xl shadow-xl mt-1 max-h-64 overflow-y-auto">
+              <ul className="p-2 text-sm font-medium text-body">
+                {allProducts
+                  .filter((p) => p._id !== editId)
+                  .map((p) => (
+                    <li key={p._id}>
+                      <div
+                        className="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium rounded cursor-pointer"
+                        onClick={() => toggleRecommended(p._id)}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={recommended.includes(p._id)}
+                          readOnly
+                          className="w-4 h-4 border border-default-strong rounded-xs bg-neutral-secondary-strong focus:ring-2 focus:ring-brand-soft"
+                        />
+                        <label className="ms-2 text-sm font-medium text-heading">
+                          {p.name}
+                        </label>
+                      </div>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         <button className="btn-primary w-full">
