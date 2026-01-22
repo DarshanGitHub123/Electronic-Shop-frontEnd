@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   getProducts,
   createProduct,
@@ -6,15 +6,18 @@ import {
   updateProduct,
 } from "../../api/product.api";
 import { getCategories } from "../../api/category.api";
-import { PackagePlus } from "lucide-react";
+import { PackagePlus, Search } from "lucide-react";
 
 export default function AdminProducts() {
-  const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const [categories, setCategories] = useState([]);
 
   const [search, setSearch] = useState("");
   const [images, setImages] = useState([]);
   const [editId, setEditId] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const [recommended, setRecommended] = useState([]);
 
   const [form, setForm] = useState({
     name: "",
@@ -26,15 +29,44 @@ export default function AdminProducts() {
 
   const [specs, setSpecs] = useState([{ key: "", value: "" }]);
 
-  const loadData = async () => {
-    setProducts((await getProducts(search)).data);
-    setCategories((await getCategories()).data);
+  /* ===============================
+     LOAD INITIAL DATA (ONCE)
+     =============================== */
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const productsRes = await getProducts();
+        const categoriesRes = await getCategories();
+        setAllProducts(productsRes.data);
+        setCategories(categoriesRes.data);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadInitialData();
+  }, []);
+
+  /* ===============================
+     FRONTEND SEARCH
+     =============================== */
+  const filteredProducts = useMemo(() => {
+    if (!search.trim()) return allProducts;
+    return allProducts.filter((p) =>
+      p.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search, allProducts]);
+
+  /* ===============================
+     REFRESH PRODUCTS AFTER CRUD
+     =============================== */
+  const refreshProducts = async () => {
+    const res = await getProducts();
+    setAllProducts(res.data);
   };
 
-  useEffect(() => {
-    loadData();
-  }, [search]);
-
+  /* ===============================
+     SPEC HANDLERS
+     =============================== */
   const updateSpec = (index, field, value) => {
     const updated = [...specs];
     updated[index][field] = value;
@@ -49,6 +81,9 @@ export default function AdminProducts() {
     setSpecs(specs.filter((_, i) => i !== index));
   };
 
+  /* ===============================
+     SUBMIT PRODUCT
+     =============================== */
   const submitProduct = async (e) => {
     e.preventDefault();
 
@@ -66,6 +101,11 @@ export default function AdminProducts() {
       specifications: JSON.stringify(specifications),
     }).forEach(([k, v]) => formData.append(k, v));
 
+    formData.append(
+      "recommendedProducts",
+      JSON.stringify(recommended)
+    );
+
     images.forEach((img) => formData.append("images", img));
 
     editId
@@ -73,9 +113,12 @@ export default function AdminProducts() {
       : await createProduct(formData);
 
     resetForm();
-    loadData();
+    refreshProducts();
   };
 
+  /* ===============================
+     RESET FORM
+     =============================== */
   const resetForm = () => {
     setEditId(null);
     setForm({
@@ -87,10 +130,15 @@ export default function AdminProducts() {
     });
     setImages([]);
     setSpecs([{ key: "", value: "" }]);
+    setRecommended([]);
   };
 
+  /* ===============================
+     EDIT PRODUCT
+     =============================== */
   const editProduct = (p) => {
     setEditId(p._id);
+
     setForm({
       name: p.name,
       description: p.description || "",
@@ -98,6 +146,12 @@ export default function AdminProducts() {
       stock: p.stock,
       category: p.category?._id || p.category,
     });
+
+    setRecommended(
+      (p.recommendedProducts || []).map((rp) =>
+        typeof rp === "string" ? rp : rp._id
+      )
+    );
 
     const specArray = Object.entries(p.specifications || {}).map(
       ([key, value]) => ({ key, value })
@@ -118,161 +172,94 @@ export default function AdminProducts() {
         </h1>
       </div>
 
-      {/* SEARCH */}
-      <input
-        className="
-          bg-white/15
-          border border-white/30
-          backdrop-blur-xl
-          rounded-xl
-          px-4 py-2
-          text-sm
-          w-full md:w-64
-          text-white
-          placeholder-white/70
-          focus:ring-2 focus:ring-orange-400
-          outline-none
-        "
-        placeholder="Search products…"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-
       {/* ADD / EDIT PRODUCT FORM */}
       <form
         onSubmit={submitProduct}
-        className="
-          bg-white/15
-          backdrop-blur-xl
-          border border-white/30
-          rounded-2xl
-          p-6
-          space-y-6
-          shadow-glass
-        "
+        className="bg-white/15 backdrop-blur-xl border border-white/30 rounded-2xl p-6 space-y-6 shadow-glass"
       >
         <h2 className="text-base font-semibold text-white">
           {editId ? "Edit Product" : "Add New Product"}
         </h2>
 
         {/* BASIC INFO */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-white/80">
-            Basic Information
-          </h3>
+        <input
+          className="glass-input"
+          placeholder="Product Name *"
+          value={form.name}
+          onChange={(e) =>
+            setForm({ ...form, name: e.target.value })
+          }
+          required
+        />
 
-          <div className="space-y-1">
-            <label className="text-xs text-white/70">
-              Product Name <span className="text-red-400">*</span>
-            </label>
-            <input
-              className="glass-input"
-              placeholder="HP Pavilion Laptop"
-              value={form.name}
-              onChange={(e) =>
-                setForm({ ...form, name: e.target.value })
-              }
-              required
-            />
-          </div>
+        <textarea
+          className="glass-input resize-none"
+          placeholder="Description"
+          rows="3"
+          value={form.description}
+          onChange={(e) =>
+            setForm({ ...form, description: e.target.value })
+          }
+        />
 
-          <div className="space-y-1">
-            <label className="text-xs text-white/70">
-              Description
-            </label>
-            <textarea
-              className="glass-input resize-none"
-              placeholder="Short description of the product"
-              value={form.description}
-              rows="3"
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
-            />
-          </div>
+        {/* PRICE & STOCK */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input
+            type="number"
+            className="glass-input"
+            placeholder="Price (₹)"
+            value={form.price}
+            onChange={(e) =>
+              setForm({ ...form, price: e.target.value })
+            }
+            required
+          />
+          <input
+            type="number"
+            className="glass-input"
+            placeholder="Stock"
+            value={form.stock}
+            onChange={(e) =>
+              setForm({ ...form, stock: e.target.value })
+            }
+            required
+          />
         </div>
 
-        {/* PRICING & CATEGORY */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-white/80">
-            Pricing & Category
-          </h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-xs text-white/70">
-                Price (₹) <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="number"
-                className="glass-input"
-                value={form.price}
-                onChange={(e) =>
-                  setForm({ ...form, price: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs text-white/70">
-                Stock <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="number"
-                className="glass-input"
-                value={form.stock}
-                onChange={(e) =>
-                  setForm({ ...form, stock: e.target.value })
-                }
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs text-white/70">
-              Category <span className="text-red-400">*</span>
-            </label>
-            <select
-              className="glass-input"
-              value={form.category}
-              onChange={(e) =>
-                setForm({ ...form, category: e.target.value })
-              }
-              required
+        {/* CATEGORY */}
+        <select
+          className="glass-input bg-white/15 text-white border border-white/30"
+          value={form.category}
+          onChange={(e) =>
+            setForm({ ...form, category: e.target.value })
+          }
+          required
+        >
+          <option value="" className="bg-gray-900 text-white">
+            Select Category
+          </option>
+          {categories.map((c) => (
+            <option
+              key={c._id}
+              value={c._id}
+              className="bg-gray-900 text-white"
             >
-              <option value="">Select Category</option>
-              {categories.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.categoryName}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+              {c.categoryName}
+            </option>
+          ))}
+        </select>
 
         {/* IMAGES */}
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-white/80">
-            Product Images
-          </h3>
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            className="glass-input"
-            onChange={(e) =>
-              setImages([...e.target.files])
-            }
-          />
-          <p className="text-xs text-white/60">
-            You can upload multiple images
-          </p>
-        </div>
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          className="glass-input"
+          onChange={(e) => setImages([...e.target.files])}
+        />
 
         {/* SPECIFICATIONS */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <h3 className="text-sm font-medium text-white/80">
             Specifications
           </h3>
@@ -281,7 +268,7 @@ export default function AdminProducts() {
             <div key={i} className="flex gap-2">
               <input
                 className="glass-input"
-                placeholder="Key (e.g. RAM)"
+                placeholder="Key"
                 value={s.key}
                 onChange={(e) =>
                   updateSpec(i, "key", e.target.value)
@@ -289,7 +276,7 @@ export default function AdminProducts() {
               />
               <input
                 className="glass-input"
-                placeholder="Value (e.g. 16 GB)"
+                placeholder="Value"
                 value={s.value}
                 onChange={(e) =>
                   updateSpec(i, "value", e.target.value)
@@ -298,7 +285,7 @@ export default function AdminProducts() {
               <button
                 type="button"
                 onClick={() => removeSpecRow(i)}
-                className="text-red-400 text-sm"
+                className="text-red-400"
               >
                 ✕
               </button>
@@ -314,82 +301,105 @@ export default function AdminProducts() {
           </button>
         </div>
 
-        {/* ACTIONS */}
-        <div className="flex gap-3">
-          <button className="btn-primary w-full">
-            {editId ? "Update Product" : "Save Product"}
-          </button>
+        {/* RECOMMENDED PRODUCTS */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-white/80">
+            Recommended Products
+          </h3>
 
-          {editId && (
-            <button
-              type="button"
-              onClick={resetForm}
-              className="
-                px-4 py-2
-                rounded-xl
-                text-sm
-                bg-white/15
-                hover:bg-white/25
-                transition
-              "
-            >
-              Cancel
-            </button>
-          )}
+          <select
+            multiple
+            value={recommended}
+            onChange={(e) =>
+              setRecommended(
+                Array.from(e.target.selectedOptions).map(
+                  (opt) => opt.value
+                )
+              )
+            }
+            className="glass-input bg-white/15 text-white border border-white/30 rounded-xl h-40"
+          >
+            {allProducts
+              .filter((p) => p._id !== editId)
+              .map((p) => (
+                <option
+                  key={p._id}
+                  value={p._id}
+                  className="bg-gray-900 text-white"
+                >
+                  {p.name}
+                </option>
+              ))}
+          </select>
         </div>
+
+        <button className="btn-primary w-full">
+          {editId ? "Update Product" : "Save Product"}
+        </button>
       </form>
 
-      {/* PRODUCT LIST (unchanged UI kept glass) */}
-      <div className="bg-white/10 backdrop-blur-xl border border-white/30 rounded-2xl overflow-x-auto shadow-glass">
-        <table className="w-full text-sm">
-          <thead className="text-white/70">
-            <tr>
-              <th className="p-4 text-left">Name</th>
-              <th>Price</th>
-              <th>Stock</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((p) => (
-              <tr
-                key={p._id}
-                className="border-t border-white/10 hover:bg-white/5 transition"
-              >
-                <td className="p-4 font-medium">{p.name}</td>
-                <td>₹{p.price}</td>
-                <td>{p.stock}</td>
-                <td className="flex gap-2 p-2">
-                  <button
-                    onClick={() => editProduct(p)}
-                    className="text-indigo-300 text-xs"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() =>
-                      deleteProduct(p._id).then(loadData)
-                    }
-                    className="text-red-400 text-xs"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+      {/* SEARCH */}
+      <div className="flex items-center gap-2 w-full md:w-[420px]">
+        <input
+          className="flex-1 bg-white/15 border border-white/30 rounded-xl px-4 py-2 text-sm text-white"
+          placeholder="Search loaded products..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <Search size={18} className="text-white/70" />
+      </div>
 
-            {products.length === 0 && (
+      {/* PRODUCT LIST */}
+      <div className="bg-white/10 border border-white/30 rounded-2xl overflow-x-auto shadow-glass">
+        {loading ? (
+          <p className="p-6 text-center text-white/60">
+            Loading products...
+          </p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="text-white/70">
               <tr>
-                <td
-                  colSpan="4"
-                  className="p-6 text-center text-white/60"
-                >
-                  No products found
-                </td>
+                <th className="p-4 text-left">Name</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Action</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredProducts.map((p) => (
+                <tr key={p._id} className="border-t border-white/10">
+                  <td className="p-4 font-medium">{p.name}</td>
+                  <td>₹{p.price}</td>
+                  <td>{p.stock}</td>
+                  <td className="flex gap-2 p-2">
+                    <button
+                      onClick={() => editProduct(p)}
+                      className="text-indigo-300 text-xs"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() =>
+                        deleteProduct(p._id).then(refreshProducts)
+                      }
+                      className="text-red-400 text-xs"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+
+              {filteredProducts.length === 0 && (
+                <tr>
+                  <td colSpan="4" className="p-6 text-center text-white/60">
+                    No matching products
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
     </div>
