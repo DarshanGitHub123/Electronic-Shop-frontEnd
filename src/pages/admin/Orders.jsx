@@ -130,20 +130,25 @@ export default function AdminOrders() {
               </p>
             </div>
 
-            {/* ✅ DELIVERY BOY (ONLY FOR OUTFORDELIVERY & DELIVERED) */}
+            {/* ✅ DELIVERY AGENT (ONLY FOR OUTFORDELIVERY & DELIVERED) */}
             {(order.status === "OutForDelivery" ||
-              order.status === "Delivered") && (
-              <div className="border-t border-white/10 pt-3 text-sm">
-                <p>
-                  <span className="text-white/60">
-                    Delivery Agent:
-                  </span>{" "}
-                  <span className="font-medium text-white">
-                    {order.deleveryAgent}
-                  </span>
-                </p>
-              </div>
+              order.status === "Delivered") &&
+              order.deliveryAgent && (
+                <div className="border-t border-white/10 pt-3 text-sm">
+                  <p>
+                    <span className="text-white/60">
+                      Delivery Agent:
+                    </span>{" "}
+                    <span className="font-medium text-white">
+                      {order.deliveryAgent.name}
+                    </span>
+                  </p>
+                  <p className="text-xs text-white/60">
+                    📞 {order.deliveryAgent.phone}
+                  </p>
+                </div>
             )}
+
 
             {/* DELIVERY ADDRESS */}
             <div className="border-t border-white/10 pt-3 text-sm">
