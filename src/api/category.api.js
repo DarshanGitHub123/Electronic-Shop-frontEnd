@@ -1,4 +1,29 @@
 import api from "./axios";
 
-export const getCategories = () => api.get("/categories");
-export const createCategory = (data) => api.post("/categories", data);
+/* ===============================
+   READ
+   =============================== */
+export const getCategories = () => {
+  return api.get("/categories");
+};
+
+/* ===============================
+   CREATE
+   =============================== */
+export const createCategory = (data) => {
+  return api.post("/categories", data);
+};
+
+/* ===============================
+   UPDATE
+   =============================== */
+export const updateCategory = (id, data) => {
+  return api.put(`/categories/${id}`, data);
+};
+
+/* ===============================
+   DELETE
+   =============================== */
+export const deleteCategory = (id) => {
+  return api.delete(`/categories/${id}`);
+};
