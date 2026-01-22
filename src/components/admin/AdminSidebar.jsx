@@ -1,55 +1,103 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import {
+  Home,
+  Package,
+  ShoppingCart,
+  Users,
+  Layers,
+} from "lucide-react";
+
+const links = [
+  { to: "/admin", label: "Dashboard", icon: Home },
+  { to: "/admin/products", label: "Products", icon: Package },
+  { to: "/admin/categories", label: "Categories", icon: Layers },
+  { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  { to: "/admin/users", label: "Users", icon: Users },
+];
 
 export default function AdminSidebar() {
-  const { pathname } = useLocation();
-  const [open, setOpen] = useState(false);
-
-  const link = (path) =>
-    `block px-4 py-2 rounded-md text-sm font-medium transition
-     ${
-       pathname === path
-         ? "bg-indigo-600 text-white"
-         : "text-gray-300 hover:bg-gray-800 hover:text-white"
-     }`;
+  const location = useLocation();
 
   return (
-    <>
-      {/* Mobile Toggle */}
-      <button
-        onClick={() => setOpen(true)}
-        className="md:hidden fixed top-3 left-3 z-50 bg-black text-white p-2 rounded"
-      >
-        ☰
-      </button>
+    <aside
+      className="
+        fixed left-3 top-3 bottom-3
+        w-16 md:w-64
+        glass
+        rounded-2xl
+        p-3
+        flex flex-col
+        gap-6
+        border border-white/30
+      "
+    >
+      {/* LOGO / TITLE */}
+      <div className="flex items-center justify-center md:justify-start gap-2 px-2">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center font-bold">
+          E
+        </div>
+        <span className="hidden md:block text-lg font-semibold tracking-wide text-white">
+          Admin Panel
+        </span>
+      </div>
 
-      {/* Overlay (Mobile) */}
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
-          className="fixed inset-0 bg-black/40 z-40 md:hidden"
-        />
-      )}
+      {/* NAV LINKS */}
+      <nav className="flex flex-col gap-2 mt-2">
+        {links.map(({ to, label, icon: Icon }) => {
+          const active = location.pathname === to;
 
-      {/* Sidebar */}
-      <aside
-        className={`fixed z-50 top-0 left-0 h-screen w-56 bg-black p-4
-        transform transition-transform
-        ${open ? "translate-x-0" : "-translate-x-full"}
-        md:translate-x-0`}
-      >
-        <h1 className="text-white font-semibold mb-6">
-          ADMIN <span className="text-indigo-400">ElectonicStore</span>
-        </h1>
+          return (
+            <Link
+              key={to}
+              to={to}
+              className={`
+                group
+                relative
+                flex items-center gap-3
+                px-3 py-2.5
+                rounded-xl
+                transition-all
+                ${
+                  active
+                    ? "bg-white/25 text-white shadow-inner"
+                    : "hover:bg-white/15 text-white/80"
+                }
+              `}
+            >
+              {/* ACTIVE INDICATOR */}
+              {active && (
+                <span className="
+                  absolute left-0 top-1/2 -translate-y-1/2
+                  h-6 w-1
+                  bg-orange-500
+                  rounded-r
+                " />
+              )}
 
-        <nav className="space-y-1">
-          <Link to="/admin" className={link("/admin")}>Dashboard</Link>
-          <Link to="/admin/products" className={link("/admin/products")}>Products</Link>
-          <Link to="/admin/categories" className={link("/admin/categories")}>Categories</Link>
-          <Link to="/admin/orders" className={link("/admin/orders")}>Orders</Link>
-          <Link to="/admin/users" className={link("/admin/users")}>Customers</Link>
-        </nav>
-      </aside>
-    </>
+              {/* ICON */}
+              <div
+                className={`
+                  w-9 h-9
+                  rounded-xl
+                  flex items-center justify-center
+                  ${
+                    active
+                      ? "bg-gradient-to-br from-orange-500 to-orange-600"
+                      : "bg-white/10 group-hover:bg-white/20"
+                  }
+                `}
+              >
+                <Icon size={18} />
+              </div>
+
+              {/* LABEL */}
+              <span className="hidden md:block text-sm font-medium">
+                {label}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+    </aside>
   );
 }

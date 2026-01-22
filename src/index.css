@@ -1,16 +1,102 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-.input {
-  @apply w-full border rounded px-3 py-2 text-sm;
+/* =========================
+   GLOBAL BACKGROUND
+   ========================= */
+body {
+  background: linear-gradient(
+    135deg,
+    #020617,
+    #0f172a,
+    #020617
+  );
+  color: white;
+  min-height: 100vh;
 }
 
-.btn-primary {
-  @apply bg-black text-white px-4 py-2 text-sm rounded;
-}
-.input {
-  @apply w-full border rounded px-3 py-2 text-sm;
-}
+/* =========================
+   DESIGN SYSTEM (v4 SAFE)
+   ========================= */
+@layer components {
 
-.btn-primary {
-  @apply bg-indigo-600 text-white px-4 py-2 rounded text-sm;
+  /* GLASS CARD */
+  .glass {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  }
+
+  /* INPUTS */
+  .glass-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: white;
+    outline: none;
+  }
+
+  .glass-input::placeholder {
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  .glass-input:focus {
+    box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.7);
+  }
+
+  /* BASIC INPUT (LOGIN ETC.) */
+  .input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: white;
+  }
+
+  .input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* PRIMARY BUTTON */
+  .btn-primary {
+    background: linear-gradient(
+      90deg,
+      #f97316,
+      #ea580c
+    );
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .btn-primary:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+  }
+
+  /* SECONDARY BUTTON */
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.75rem;
+    transition: background 0.15s ease;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
 }

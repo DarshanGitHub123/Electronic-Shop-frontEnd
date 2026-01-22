@@ -1,35 +1,83 @@
-import { useNavigate } from "react-router-dom";
+import { Bell, Search } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminTopbar() {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();          // clears token + role
-    navigate("/login");
-  };
-
   return (
-    <header className="h-14 bg-white border-b flex items-center px-4 md:px-6">
-      
-      {/* Optional left content (title / logo) */}
-      <h1 className="text-sm font-semibold text-gray-700">
-        Admin Dashboard
-      </h1>
+    <header className="mx-4 mt-4">
+      <div className="
+        glass
+        px-4 py-3
+        rounded-2xl
+        flex items-center justify-between
+        gap-3
+        bg-white/20
+        backdrop-blur-xl
+        border border-white/30
+      ">
+        {/* LEFT: SEARCH */}
+        <div className="flex items-center gap-2 w-full max-w-md">
+          <Search size={18} className="text-white/80" />
+          <input
+            className="
+              bg-transparent
+              w-full
+              text-sm
+              text-white
+              placeholder-white/70
+              outline-none
+              hidden sm:block
+            "
+            placeholder="Search orders, products..."
+          />
+        </div>
 
-      {/* Right: Admin info + logout */}
-      <div className="flex items-center gap-4 ml-auto">
-        <span className="text-sm text-gray-600 hidden sm:block">
-          Admin
-        </span>
+        {/* RIGHT: ACTIONS */}
+        <div className="flex items-center gap-3">
+          {/* NOTIFICATION */}
+          <button
+            className="
+              relative
+              w-9 h-9
+              rounded-xl
+              flex items-center justify-center
+              bg-white/20
+              hover:bg-white/30
+              transition
+            "
+          >
+            <Bell size={18} />
+            <span className="
+              absolute -top-1 -right-1
+              w-2 h-2
+              bg-orange-500
+              rounded-full
+            " />
+          </button>
 
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded"
-        >
-          Logout
-        </button>
+          {/* LOGOUT */}
+          <button
+            onClick={() => {
+              logout();
+              navigate("/login");
+            }}
+            className="
+              px-4 py-2
+              rounded-xl
+              text-sm font-medium
+              bg-gradient-to-r from-orange-500 to-orange-600
+              text-white
+              shadow-lg
+              hover:scale-[1.03]
+              transition
+            "
+          >
+            Logout
+          </button>
+        </div>
       </div>
     </header>
   );
