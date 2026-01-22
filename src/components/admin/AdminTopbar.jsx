@@ -20,19 +20,8 @@ export default function AdminTopbar() {
       ">
         {/* LEFT: SEARCH */}
         <div className="flex items-center gap-2 w-full max-w-md">
-          <Search size={18} className="text-white/80" />
-          <input
-            className="
-              bg-transparent
-              w-full
-              text-sm
-              text-white
-              placeholder-white/70
-              outline-none
-              hidden sm:block
-            "
-            placeholder="Search orders, products..."
-          />
+          
+          Admin Panel
         </div>
 
         {/* RIGHT: ACTIONS */}

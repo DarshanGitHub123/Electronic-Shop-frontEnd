@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../../api/auth.api";
 import { useAuth } from "../../context/AuthContext";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export default function Login() {
     password: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -26,17 +28,10 @@ export default function Login() {
 
     try {
       const res = await loginUser(form);
-
       const { token, role } = res.data;
 
       login(token, role);
-
-      // Role-based redirect
-      if (role === "Admin") {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
+      role === "Admin" ? navigate("/admin") : navigate("/");
     } catch (err) {
       setError(
         err.response?.data?.message || "Invalid email or password"
@@ -47,30 +42,34 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm bg-white border rounded-lg p-6 shadow-sm">
-        
-        {/* Header */}
-        <h1 className="text-xl font-semibold text-center mb-1">
-          Sign in
-        </h1>
-        <p className="text-xs text-center text-gray-500 mb-4">
-          Continue to ElectroShop
-        </p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-black px-4">
 
-        {/* Error */}
+      <div className="w-full max-w-sm bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl p-6 space-y-5">
+
+        {/* HEADER */}
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold text-white">
+            Welcome Back
+          </h1>
+          <p className="text-xs text-white/60 mt-1">
+            Sign in to continue to <span className="font-medium">ElectroShop</span>
+          </p>
+        </div>
+
+        {/* ERROR */}
         {error && (
-          <div className="bg-red-100 text-red-600 text-xs p-2 rounded mb-3">
+          <div className="bg-red-500/20 text-red-300 text-xs border border-red-500/30 px-4 py-2 rounded-xl">
             {error}
           </div>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-3">
-          
-          <div>
-            <label className="block text-xs font-medium mb-1">
-              Email
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+
+          {/* EMAIL */}
+          <div className="space-y-1">
+            <label className="text-xs text-white/70">
+              Email address
             </label>
             <input
               type="email"
@@ -79,45 +78,62 @@ export default function Login() {
               value={form.email}
               onChange={handleChange}
               placeholder="you@example.com"
-              className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black"
+              className="w-full bg-white/15 border border-white/30 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-medium mb-1">
+          {/* PASSWORD WITH EYE TOGGLE */}
+          <div className="space-y-1">
+            <label className="text-xs text-white/70">
               Password
             </label>
-            <input
-              type="password"
-              name="password"
-              required
-              value={form.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black"
-            />
+
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                required
+                value={form.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                className="w-full bg-white/15 border border-white/30 rounded-xl px-4 py-2.5 pr-11 text-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+
+              {/* EYE BUTTON */}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition"
+              >
+                {showPassword ? (
+                  <EyeOff size={18} />
+                ) : (
+                  <Eye size={18} />
+                )}
+              </button>
+            </div>
           </div>
 
+          {/* SUBMIT */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white text-sm py-2 rounded hover:bg-gray-900 transition disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-sm font-medium py-2.5 rounded-xl transition disabled:opacity-50"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
-        {/* Footer */}
-        <p className="text-xs text-center mt-4">
+        {/* FOOTER */}
+        <p className="text-xs text-center text-white/60">
           New to ElectroShop?{" "}
           <Link
             to="/register"
-            className="text-blue-600 hover:underline"
+            className="text-orange-400 hover:underline font-medium"
           >
             Create an account
           </Link>
         </p>
-
       </div>
     </div>
   );
