@@ -6,7 +6,7 @@ import {
   updateProduct,
 } from "../../api/product.api";
 import { getCategories } from "../../api/category.api";
-import { PackagePlus, Search } from "lucide-react";
+import { PackagePlus, Search, Loader2 } from "lucide-react";
 
 export default function AdminProducts() {
   const [allProducts, setAllProducts] = useState([]);
@@ -14,8 +14,10 @@ export default function AdminProducts() {
 
   const [search, setSearch] = useState("");
   const [images, setImages] = useState([]);
+  const [oldImages, setOldImages] = useState([]); // ✅ NEW: PREVIEW OLD IMAGES
   const [editId, setEditId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ NEW: LOADING STATE
 
   const [recommended, setRecommended] = useState([]);
   const [showRecommendedDropdown, setShowRecommendedDropdown] = useState(false);
@@ -24,8 +26,9 @@ export default function AdminProducts() {
     name: "",
     description: "",
     price: "",
+    discount: "",      // ✅ NEW
     stock: "",
-    tax: "",           // ✅ NEW
+    tax: "",
     category: "",
   });
 
@@ -96,35 +99,43 @@ export default function AdminProducts() {
      =============================== */
   const submitProduct = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
-    const specifications = {};
-    specs.forEach((s) => {
-      if (s.key && s.value) specifications[s.key] = s.value;
-    });
+    try {
+      const specifications = {};
+      specs.forEach((s) => {
+        if (s.key && s.value) specifications[s.key] = s.value;
+      });
 
-    const formData = new FormData();
+      const formData = new FormData();
 
-    Object.entries({
-      ...form,
-      price: Number(form.price),
-      stock: Number(form.stock),
-      tax: Number(form.tax),                 // ✅ SEND TAX
-      specifications: JSON.stringify(specifications),
-    }).forEach(([k, v]) => formData.append(k, v));
+      Object.entries({
+        ...form,
+        price: Number(form.price),
+        discount: Number(form.discount || 0), // ✅ SEND DISCOUNT
+        stock: Number(form.stock),
+        tax: Number(form.tax),
+        specifications: JSON.stringify(specifications),
+      }).forEach(([k, v]) => formData.append(k, v));
 
-    formData.append(
-      "recommendedProducts",
-      JSON.stringify(recommended)
-    );
+      formData.append(
+        "recommendedProducts",
+        JSON.stringify(recommended)
+      );
 
-    images.forEach((img) => formData.append("images", img));
+      images.forEach((img) => formData.append("images", img));
 
-    editId
-      ? await updateProduct(editId, formData)
-      : await createProduct(formData);
+      editId
+        ? await updateProduct(editId, formData)
+        : await createProduct(formData);
 
-    resetForm();
-    refreshProducts();
+      resetForm();
+      refreshProducts();
+    } catch (error) {
+      console.error("SUBMIT ERROR:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   /* ===============================
@@ -136,11 +147,13 @@ export default function AdminProducts() {
       name: "",
       description: "",
       price: "",
+      discount: "",      // ✅ RESET DISCOUNT
       stock: "",
-      tax: "",          // ✅ RESET TAX
+      tax: "",
       category: "",
     });
     setImages([]);
+    setOldImages([]);    // ✅ RESET OLD IMAGES
     setSpecs([{ key: "", value: "" }]);
     setRecommended([]);
   };
@@ -155,10 +168,13 @@ export default function AdminProducts() {
       name: p.name,
       description: p.description || "",
       price: p.price,
+      discount: p.discount || "",       // ✅ PREFILL DISCOUNT
       stock: p.stock,
-      tax: p.tax ?? "",                 // ✅ PREFILL TAX
+      tax: p.tax ?? "",
       category: p.category?._id || p.category,
     });
+
+    setOldImages(p.images || []);       // ✅ PREVIEW OLD IMAGES
 
     setRecommended(
       (p.recommendedProducts || []).map((rp) =>
@@ -215,8 +231,8 @@ export default function AdminProducts() {
           }
         />
 
-        {/* PRICE / STOCK / TAX */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* PRICE / STOCK / TAX / DISCOUNT */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <input
             type="number"
             className="glass-input"
@@ -247,6 +263,15 @@ export default function AdminProducts() {
             }
             required
           />
+          <input
+            type="number"
+            className="glass-input"
+            placeholder="Discount (%)"
+            value={form.discount}
+            onChange={(e) =>
+              setForm({ ...form, discount: e.target.value })
+            }
+          />
         </div>
 
         {/* CATEGORY */}
@@ -273,13 +298,37 @@ export default function AdminProducts() {
         </select>
 
         {/* IMAGES */}
-        <input
-          type="file"
-          multiple
-          accept="image/*"
-          className="glass-input"
-          onChange={(e) => setImages([...e.target.files])}
-        />
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-white/80">Product Images</h3>
+
+          {/* ✅ PREVIEW OLD IMAGES */}
+          {oldImages.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-xs text-white/60">Existing Images:</label>
+              <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                {oldImages.map((src, i) => (
+                  <img
+                    key={i}
+                    src={src}
+                    alt={`Preview ${i}`}
+                    className="w-20 h-20 object-cover rounded-lg border border-white/20 flex-shrink-0"
+                  />
+                ))}
+              </div>
+              <p className="text-[10px] text-white/40 italic">
+                * Uploading new images will replace these.
+              </p>
+            </div>
+          )}
+
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            className="glass-input"
+            onChange={(e) => setImages([...e.target.files])}
+          />
+        </div>
 
         {/* RECOMMENDED PRODUCTS */}
         <div className="space-y-2 relative">
@@ -328,8 +377,18 @@ export default function AdminProducts() {
         </div>
 
         {/* SUBMIT */}
-        <button className="btn-primary w-full">
-          {editId ? "Update Product" : "Save Product"}
+        <button
+          className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              {editId ? "Updating..." : "Saving..."}
+            </>
+          ) : (
+            editId ? "Update Product" : "Save Product"
+          )}
         </button>
       </form>
 
@@ -356,6 +415,7 @@ export default function AdminProducts() {
               <tr>
                 <th className="p-4 text-left">Name</th>
                 <th>Price</th>
+                <th>Discount</th>
                 <th>Stock</th>
                 <th>Tax</th>
                 <th>Action</th>
@@ -363,9 +423,10 @@ export default function AdminProducts() {
             </thead>
             <tbody>
               {filteredProducts.map((p) => (
-                <tr key={p._id} className="border-t border-white/10">
-                  <td className="p-4 font-medium">{p.name}</td>
+                <tr key={p._id} className="border-t border-white/10 text-center">
+                  <td className="p-4 font-medium text-left">{p.name}</td>
                   <td>₹{p.price}</td>
+                  <td className="text-green-400">{p.discount || 0}%</td>
                   <td>{p.stock}</td>
                   <td>{p.tax}%</td>
                   <td className="flex gap-2 p-2">
