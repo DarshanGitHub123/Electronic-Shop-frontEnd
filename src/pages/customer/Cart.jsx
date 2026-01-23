@@ -53,6 +53,7 @@ export default function Cart() {
           country: checkoutData.country,
           postalCode: checkoutData.postalCode,
         },
+        customizationDescription: checkoutData.customizationDescription,
         paymentDetails: {
           method: checkoutData.paymentMethod,
           status: checkoutData.paymentMethod === "Online" ? "Paid" : "Pending",
@@ -234,6 +235,9 @@ export default function Cart() {
         isOpen={showCheckout}
         onClose={() => setShowCheckout(false)}
         onSubmit={handleCheckout}
+        itemTotal={itemTotal}
+        deliveryFee={deliveryFee}
+        discount={discount}
         total={grandTotal}
       />
     </div>

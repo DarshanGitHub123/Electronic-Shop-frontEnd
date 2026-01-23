@@ -330,6 +330,48 @@ export default function AdminProducts() {
           />
         </div>
 
+        {/* SPECIFICATIONS */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-white/80">Technical Specifications</h3>
+            <button
+              type="button"
+              onClick={addSpecRow}
+              className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
+            >
+              + Add Row
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {specs.map((s, i) => (
+              <div key={i} className="flex gap-2">
+                <input
+                  className="glass-input !py-1 text-xs"
+                  placeholder="Key (e.g. RAM)"
+                  value={s.key}
+                  onChange={(e) => updateSpec(i, "key", e.target.value)}
+                />
+                <input
+                  className="glass-input !py-1 text-xs"
+                  placeholder="Value (e.g. 16GB)"
+                  value={s.value}
+                  onChange={(e) => updateSpec(i, "value", e.target.value)}
+                />
+                {specs.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeSpecRow(i)}
+                    className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* RECOMMENDED PRODUCTS */}
         <div className="space-y-2 relative">
           <h3 className="text-sm font-medium text-white/80">

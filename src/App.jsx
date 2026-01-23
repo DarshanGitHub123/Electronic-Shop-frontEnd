@@ -10,6 +10,8 @@ import Home from "./pages/customer/Home";
 import Cart from "./pages/customer/Cart";
 import CustomerOrders from "./pages/customer/Orders";
 import CollectionDetail from "./pages/customer/CollectionDetail";
+import CategoryDetail from "./pages/customer/CategoryDetail";
+import ProductDetails from "./pages/customer/ProductDetails";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 
@@ -39,6 +41,8 @@ export default function App() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/orders" element={<CustomerOrders />} />
               <Route path="/collections/:id" element={<CollectionDetail />} />
+              <Route path="/category/:id" element={<CategoryDetail />} />
+              <Route path="/product/:id" element={<ProductDetails />} />
             </Route>
 
             {/* ---------- ADMIN ---------- */}

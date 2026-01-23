@@ -103,14 +103,13 @@ export default function AdminOrders() {
 
               <span
                 className={`text-xs px-3 py-1 rounded-xl w-fit
-                  ${
-                    order.status === "Pending"
-                      ? "bg-yellow-500/20 text-yellow-300"
-                      : order.status === "OutForDelivery"
+                  ${order.status === "Pending"
+                    ? "bg-yellow-500/20 text-yellow-300"
+                    : order.status === "OutForDelivery"
                       ? "bg-blue-500/20 text-blue-300"
                       : order.status === "Delivered"
-                      ? "bg-green-500/20 text-green-300"
-                      : "bg-red-500/20 text-red-300"
+                        ? "bg-green-500/20 text-green-300"
+                        : "bg-red-500/20 text-red-300"
                   }`}
               >
                 {order.status}
@@ -130,6 +129,18 @@ export default function AdminOrders() {
               </p>
             </div>
 
+            {/* CUSTOMIZATION NOTES */}
+            {order.customizationDescription && (
+              <div className="border-t border-white/10 pt-3 text-sm">
+                <p className="flex items-center gap-2 text-purple-300 font-bold mb-1">
+                  <PackageCheck size={14} /> Customization Instructions
+                </p>
+                <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-3 text-xs italic text-white/80 leading-relaxed">
+                  "{order.customizationDescription}"
+                </div>
+              </div>
+            )}
+
             {/* ✅ DELIVERY AGENT (ONLY FOR OUTFORDELIVERY & DELIVERED) */}
             {(order.status === "OutForDelivery" ||
               order.status === "Delivered") &&
@@ -147,7 +158,7 @@ export default function AdminOrders() {
                     📞 {order.deliveryAgent.phone}
                   </p>
                 </div>
-            )}
+              )}
 
 
             {/* DELIVERY ADDRESS */}
@@ -184,10 +195,9 @@ export default function AdminOrders() {
                 </span>{" "}
                 <span
                   className={`text-xs px-2 py-1 rounded ml-1
-                    ${
-                      order.paymentDetails?.status === "Paid"
-                        ? "bg-green-500/20 text-green-300"
-                        : "bg-yellow-500/20 text-yellow-300"
+                    ${order.paymentDetails?.status === "Paid"
+                      ? "bg-green-500/20 text-green-300"
+                      : "bg-yellow-500/20 text-yellow-300"
                     }`}
                 >
                   {order.paymentDetails?.status}
@@ -219,7 +229,7 @@ export default function AdminOrders() {
               {order.items.map((item, idx) => {
                 const status =
                   inventoryStatus[order._id]?.[
-                    item.product._id
+                  item.product._id
                   ];
 
                 return (
@@ -241,10 +251,9 @@ export default function AdminOrders() {
                       {status && (
                         <span
                           className={`text-xs px-2 py-1 rounded
-                            ${
-                              status === "Available"
-                                ? "bg-green-500/20 text-green-300"
-                                : status === "Out of Stock"
+                            ${status === "Available"
+                              ? "bg-green-500/20 text-green-300"
+                              : status === "Out of Stock"
                                 ? "bg-red-500/20 text-red-300"
                                 : "bg-gray-500/20 text-gray-300"
                             }`}
@@ -272,10 +281,9 @@ export default function AdminOrders() {
                     changeStatus(order._id, s)
                   }
                   className={`px-4 py-1.5 rounded-xl text-xs transition
-                    ${
-                      order.status === s
-                        ? "bg-orange-500 text-white"
-                        : "bg-white/10 hover:bg-white/20"
+                    ${order.status === s
+                      ? "bg-orange-500 text-white"
+                      : "bg-white/10 hover:bg-white/20"
                     }`}
                 >
                   {s}

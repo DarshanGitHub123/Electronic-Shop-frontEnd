@@ -7,6 +7,11 @@ export const getCategories = () => {
   return api.get("/categories");
 };
 
+export const getCategoryById = (id) => {
+  return api.get(`/categories/${id}`);
+};
+
+
 /* ===============================
    CREATE
    =============================== */

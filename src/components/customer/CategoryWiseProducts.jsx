@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getCategories } from "../../api/category.api";
 import { getProducts } from "../../api/product.api";
 import ProductCard from "../product/ProductCard";
@@ -47,10 +48,13 @@ export default function CategoryWiseProducts() {
                                     {category.categoryName}
                                 </h2>
                             </div>
-                            <button className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors">
+                            <Link
+                                to={`/category/${category._id}`}
+                                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors"
+                            >
                                 View All
                                 <ChevronRight className="w-4 h-4" />
-                            </button>
+                            </Link>
                         </div>
 
                         {/* Products Grid */}

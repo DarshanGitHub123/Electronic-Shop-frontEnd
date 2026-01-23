@@ -145,15 +145,23 @@ export default function Billings() {
               </p>
             </div>
 
+            {/* CUSTOMIZATION */}
+            {order.customizationDescription && (
+              <div className="text-sm bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-2">
+                <p className="text-[10px] font-bold uppercase text-indigo-300">Notes / Customization</p>
+                <p className="text-xs italic text-white/90">"{order.customizationDescription}"</p>
+              </div>
+            )}
+
             {/* ITEMS */}
-            <table className="w-full text-sm">
+            <table className="w-full text-sm border-1px">
               <thead>
                 <tr>
-                  <th>Product</th>
-                  <th>Qty</th>
-                  <th>Base</th>
-                  <th>Tax</th>
-                  <th>Total</th>
+                  <th className="text-left">Product</th>
+                  <th className="text-left">Qty</th>
+                  <th className="text-left">Base</th>
+                  <th className="text-left">Tax</th>
+                  <th className="text-left">Total</th>
                 </tr>
               </thead>
               <tbody>
