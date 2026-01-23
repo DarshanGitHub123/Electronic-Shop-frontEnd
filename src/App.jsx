@@ -9,6 +9,7 @@ import ProtectedRoute from "./components/common/ProtectedRoute";
 import Home from "./pages/customer/Home";
 import Cart from "./pages/customer/Cart";
 import CustomerOrders from "./pages/customer/Orders";
+import CollectionDetail from "./pages/customer/CollectionDetail";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 
@@ -37,6 +38,7 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/orders" element={<CustomerOrders />} />
+              <Route path="/collections/:id" element={<CollectionDetail />} />
             </Route>
 
             {/* ---------- ADMIN ---------- */}
