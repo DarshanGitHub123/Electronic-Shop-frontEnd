@@ -6,14 +6,16 @@ import {
   Users,
   Layers,
   Receipt,
+  LayoutGrid, // ✅ COLLECTIONS ICON
 } from "lucide-react";
 
 const links = [
   { to: "/admin", label: "Dashboard", icon: Home },
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/categories", label: "Categories", icon: Layers },
+  { to: "/admin/collections", label: "Collections", icon: LayoutGrid }, // ✅ NEW
   { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
-  { to: "/admin/billings", label: "Billings", icon: Receipt }, // ✅ NEW
+  { to: "/admin/billings", label: "Billings", icon: Receipt },
   { to: "/admin/users", label: "Users", icon: Users },
 ];
 
@@ -62,10 +64,12 @@ export default function AdminSidebar() {
                 }
               `}
             >
+              {/* ACTIVE INDICATOR */}
               {active && (
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 bg-orange-500 rounded-r" />
               )}
 
+              {/* ICON */}
               <div
                 className={`
                   w-9 h-9 rounded-xl flex items-center justify-center
@@ -79,6 +83,7 @@ export default function AdminSidebar() {
                 <Icon size={18} />
               </div>
 
+              {/* LABEL */}
               <span className="hidden md:block text-sm font-medium">
                 {label}
               </span>
