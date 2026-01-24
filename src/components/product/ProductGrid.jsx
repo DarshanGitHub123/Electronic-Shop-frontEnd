@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getProducts } from "../../api/product.api";
+import { useSearch } from "../../context/SearchContext";
 import ProductCard from "./ProductCard";
 
 export default function ProductGrid() {
