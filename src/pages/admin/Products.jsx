@@ -446,35 +446,44 @@ export default function AdminProducts() {
       </div>
 
       {/* PRODUCT LIST */}
-      <div className="bg-white/10 border border-white/30 rounded-2xl overflow-x-auto shadow-glass">
+      <div className="space-y-4">
         {loading ? (
-          <p className="p-6 text-center text-white/60">
+          <p className="p-6 text-center text-white/60 bg-white/10 rounded-2xl border border-white/30">
             Loading products...
           </p>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="text-white/70">
-              <tr>
-                <th className="p-4 text-left">Name</th>
-                <th>Price</th>
-                <th>Discount</th>
-                <th>Stock</th>
-                <th>Tax</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* MOBILE VIEW: CARDS */}
+            <div className="grid grid-cols-1 gap-4 md:hidden">
               {filteredProducts.map((p) => (
-                <tr key={p._id} className="border-t border-white/10 text-center">
-                  <td className="p-4 font-medium text-left">{p.name}</td>
-                  <td>₹{p.price}</td>
-                  <td className="text-green-400">{p.discount || 0}%</td>
-                  <td>{p.stock}</td>
-                  <td>{p.tax}%</td>
-                  <td className="flex gap-2 p-2 justify-center">
+                <div
+                  key={p._id}
+                  className="bg-white/10 backdrop-blur-xl border border-white/30 rounded-2xl p-5 space-y-3 shadow-glass"
+                >
+                  <div className="flex justify-between items-start gap-4">
+                    <h3 className="font-semibold text-white leading-tight flex-1">{p.name}</h3>
+                    <span className="text-orange-400 font-bold">₹{p.price}</span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 text-[10px] text-white/60 uppercase tracking-widest font-bold">
+                    <div className="flex flex-col gap-1">
+                      <span>Stock</span>
+                      <span className="text-white text-xs">{p.stock}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span>Tax</span>
+                      <span className="text-white text-xs">{p.tax}%</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span>Discount</span>
+                      <span className="text-green-400 text-xs">{p.discount || 0}%</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-2 border-t border-white/10">
                     <button
                       onClick={() => editProduct(p)}
-                      className="text-indigo-300 text-xs p-2 bg-indigo-500 rounded text-white"
+                      className="flex-1 py-2 text-xs font-bold bg-indigo-500 text-white rounded-xl shadow-lg active:scale-95 transition"
                     >
                       Edit
                     </button>
@@ -482,23 +491,66 @@ export default function AdminProducts() {
                       onClick={() =>
                         deleteProduct(p._id).then(refreshProducts)
                       }
-                      className="text-red-400 text-xs p-2 bg-red-500 rounded text-white"
+                      className="flex-1 py-2 text-xs font-bold bg-red-500 text-white rounded-xl shadow-lg active:scale-95 transition"
                     >
                       Delete
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
+            </div>
 
-              {filteredProducts.length === 0 && (
-                <tr>
-                  <td colSpan="5" className="p-6 text-center text-white/60">
-                    No matching products
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+            {/* DESKTOP VIEW: TABLE */}
+            <div className="hidden md:block bg-white/10 border border-white/30 rounded-2xl overflow-hidden shadow-glass">
+              <table className="w-full text-sm">
+                <thead className="text-white/70 bg-white/5">
+                  <tr>
+                    <th className="p-4 text-left">Name</th>
+                    <th className="p-4 text-center">Price</th>
+                    <th className="p-4 text-center">Discount</th>
+                    <th className="p-4 text-center">Stock</th>
+                    <th className="p-4 text-center">Tax</th>
+                    <th className="p-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredProducts.map((p) => (
+                    <tr key={p._id} className="border-t border-white/10 hover:bg-white/5 transition">
+                      <td className="p-4 font-medium text-white">{p.name}</td>
+                      <td className="p-4 text-center text-white">₹{p.price}</td>
+                      <td className="p-4 text-center text-green-400 font-bold">{p.discount || 0}%</td>
+                      <td className="p-4 text-center text-white">{p.stock}</td>
+                      <td className="p-4 text-center text-white">{p.tax}%</td>
+                      <td className="p-4 text-right">
+                        <div className="flex gap-2 justify-end">
+                          <button
+                            onClick={() => editProduct(p)}
+                            className="p-2 bg-indigo-500/20 hover:bg-indigo-500 text-indigo-300 hover:text-white rounded-xl transition"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() =>
+                              deleteProduct(p._id).then(refreshProducts)
+                            }
+                            className="p-2 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-xl transition"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {filteredProducts.length === 0 && (
+              <div className="p-10 text-center text-white/40 bg-white/5 rounded-2xl border border-dashed border-white/20">
+                No matching products found
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

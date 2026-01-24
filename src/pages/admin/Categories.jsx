@@ -197,56 +197,88 @@ export default function AdminCategories() {
       </form>
 
       {/* CATEGORY LIST */}
-      <div className="glass rounded-2xl overflow-x-auto border border-white/30">
-        <table className="w-full text-sm">
-          <thead className="text-white/70">
-            <tr>
-              <th className="p-4 text-left">Category</th>
-              <th className="p-4 text-left">Description</th>
-              <th className="text-right pr-4">Action</th>
-            </tr>
-          </thead>
+      <div className="space-y-4">
+        {/* MOBILE VIEW cards */}
+        <div className="grid grid-cols-1 gap-4 md:hidden">
+          {categories.map((c) => (
+            <div
+              key={c._id}
+              className="bg-white/10 backdrop-blur-xl border border-white/30 rounded-2xl p-5 space-y-4 shadow-glass"
+            >
+              <div className="flex justify-between items-center border-b border-white/10 pb-2">
+                <h3 className="font-bold text-white tracking-wide">{c.categoryName}</h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => editCategory(c)}
+                    className="p-2 bg-indigo-500/20 text-indigo-300 rounded-xl"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    onClick={() => removeCategory(c._id)}
+                    className="p-2 bg-red-500/20 text-red-400 rounded-xl"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+              <p className="text-sm text-white/70 italic leading-relaxed">
+                {c.description}
+              </p>
+            </div>
+          ))}
+        </div>
 
-          <tbody>
-            {categories.map((c) => (
-              <tr
-                key={c._id}
-                className="border-t border-white/10 hover:bg-white/5 transition"
-              >
-                <td className="p-4 font-medium">
-                  {c.categoryName}
-                </td>
-                <td className="text-white/80">
-                  {c.description}
-                </td>
-                <td className="text-right pr-4">
-                  <div className="inline-flex gap-3">
-                    <button
-                      onClick={() => editCategory(c)}
-                      className="text-indigo-300 text-xs"
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      onClick={() => removeCategory(c._id)}
-                      className="text-red-400 text-xs"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-
-            {categories.length === 0 && (
+        {/* DESKTOP VIEW table */}
+        <div className="hidden md:block glass rounded-2xl overflow-hidden border border-white/30 shadow-glass">
+          <table className="w-full text-sm">
+            <thead className="text-white/70 bg-white/5">
               <tr>
-                <td colSpan="3" className="p-6 text-center text-white/60">
-                  No categories available
-                </td>
+                <th className="p-4 text-left">Category</th>
+                <th className="p-4 text-left">Description</th>
+                <th className="p-4 text-right">Action</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {categories.map((c) => (
+                <tr
+                  key={c._id}
+                  className="border-t border-white/10 hover:bg-white/5 transition"
+                >
+                  <td className="p-4 font-bold text-white">
+                    {c.categoryName}
+                  </td>
+                  <td className="p-4 text-white/80">
+                    {c.description}
+                  </td>
+                  <td className="p-4 text-right">
+                    <div className="inline-flex gap-3">
+                      <button
+                        onClick={() => editCategory(c)}
+                        className="p-2 bg-indigo-500/20 hover:bg-indigo-500 text-indigo-300 hover:text-white rounded-xl transition"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        onClick={() => removeCategory(c._id)}
+                        className="p-2 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-xl transition"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {categories.length === 0 && (
+          <div className="p-10 text-center text-white/40 bg-white/5 rounded-2xl border border-dashed border-white/20">
+            No categories available
+          </div>
+        )}
       </div>
 
     </div>

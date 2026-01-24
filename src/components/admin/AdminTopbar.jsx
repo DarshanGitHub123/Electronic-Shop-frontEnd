@@ -1,13 +1,13 @@
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, Menu } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-export default function AdminTopbar() {
+export default function AdminTopbar({ toggleSidebar }) {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
   return (
-    <header className="mx-4 mt-4">
+    <header className="mx-4 mt-4 relative z-30">
       <div className="
         glass
         px-4 py-3
@@ -18,10 +18,17 @@ export default function AdminTopbar() {
         backdrop-blur-xl
         border border-white/30
       ">
-        {/* LEFT: SEARCH */}
-        <div className="flex items-center gap-2 w-full max-w-md">
-
-          Admin Panel
+        {/* LEFT: TOGGLE & TITLE */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={toggleSidebar}
+            className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-all shadow-md active:scale-95"
+          >
+            <Menu size={22} />
+          </button>
+          <span className="text-xl font-black text-white tracking-tighter hidden sm:block">
+            ELECTRO<span className="text-orange-500">SHOP</span>
+          </span>
         </div>
 
         {/* RIGHT: ACTIONS */}

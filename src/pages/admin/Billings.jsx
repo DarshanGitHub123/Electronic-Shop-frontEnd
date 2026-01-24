@@ -154,39 +154,73 @@ export default function Billings() {
             )}
 
             {/* ITEMS */}
-            <table className="w-full text-sm border-1px">
-              <thead>
-                <tr>
-                  <th className="text-left">Product</th>
-                  <th className="text-left">Qty</th>
-                  <th className="text-left">Base</th>
-                  <th className="text-left">Tax</th>
-                  <th className="text-right">Total</th>
-                </tr>
-              </thead>
-              <tbody>
+            <div className="space-y-4">
+              <h4 className="text-[10px] font-bold uppercase tracking-wider text-white/40 border-b border-white/10 pb-1">Order Items</h4>
+
+              {/* MOBILE ITEMS VIEW */}
+              <div className="space-y-3 md:hidden">
                 {order.items.map((item) => {
-                  const base =
-                    item.product.price *
-                    item.quantity;
-                  const tax =
-                    base *
-                    ((item.product.tax || 0) / 100);
+                  const base = item.product.price * item.quantity;
+                  const tax = base * ((item.product.tax || 0) / 100);
 
                   return (
-                    <tr key={item._id}>
-                      <td>{item.product.name}</td>
-                      <td>{item.quantity}</td>
-                      <td>₹{base.toFixed(2)}</td>
-                      <td>₹{tax.toFixed(2)}</td>
-                      <td className="text-right">
-                        ₹{(base + tax).toFixed(2)}
-                      </td>
-                    </tr>
+                    <div key={item._id} className="bg-white/5 rounded-xl p-3 border border-white/10 space-y-2">
+                      <div className="flex justify-between items-start">
+                        <span className="text-sm font-semibold text-white">{item.product.name}</span>
+                        <span className="text-xs text-white/60">Qty: {item.quantity}</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-[10px] font-medium text-white/50 uppercase">
+                        <div className="flex flex-col">
+                          <span>Base</span>
+                          <span className="text-white text-xs">₹{base.toFixed(2)}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span>Tax</span>
+                          <span className="text-white text-xs">₹{tax.toFixed(2)}</span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span>Total</span>
+                          <span className="text-orange-400 text-xs">₹{(base + tax).toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
                   );
                 })}
-              </tbody>
-            </table>
+              </div>
+
+              {/* DESKTOP ITEMS VIEW */}
+              <div className="hidden md:block overflow-hidden rounded-xl border border-white/10">
+                <table className="w-full text-sm">
+                  <thead className="bg-white/5 text-white/60">
+                    <tr>
+                      <th className="p-3 text-left">Product</th>
+                      <th className="p-3 text-center">Qty</th>
+                      <th className="p-3 text-center">Base</th>
+                      <th className="p-3 text-center">Tax</th>
+                      <th className="p-3 text-right">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/10 text-white/80">
+                    {order.items.map((item) => {
+                      const base = item.product.price * item.quantity;
+                      const tax = base * ((item.product.tax || 0) / 100);
+
+                      return (
+                        <tr key={item._id} className="hover:bg-white/5 transition">
+                          <td className="p-3 font-medium text-white">{item.product.name}</td>
+                          <td className="p-3 text-center">{item.quantity}</td>
+                          <td className="p-3 text-center">₹{base.toFixed(2)}</td>
+                          <td className="p-3 text-center">₹{tax.toFixed(2)}</td>
+                          <td className="p-3 text-right font-semibold text-white">
+                            ₹{(base + tax).toFixed(2)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
             {/* TOTALS */}
             <div className="text-sm space-y-1">
