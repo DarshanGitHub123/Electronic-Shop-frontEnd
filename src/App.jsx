@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 
 import CustomerLayout from "./layouts/CustomerLayout";
@@ -29,43 +29,57 @@ export default function App() {
     <AuthProvider>
       <CartProvider>
         <BrowserRouter>
-          <Routes>
-
-            {/* ---------- AUTH ---------- */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-
-            {/* ---------- CUSTOMER ---------- */}
-            <Route element={<CustomerLayout />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/orders" element={<CustomerOrders />} />
-              <Route path="/collections/:id" element={<CollectionDetail />} />
-              <Route path="/category/:id" element={<CategoryDetail />} />
-              <Route path="/product/:id" element={<ProductDetails />} />
-            </Route>
-
-            {/* ---------- ADMIN ---------- */}
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute role="Admin">
-                  <AdminLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Dashboard />} />
-              <Route path="categories" element={<AdminCategories />} />
-              <Route path="products" element={<AdminProducts />} />
-              <Route path="orders" element={<AdminOrders />} />
-              <Route path="billings" element={<Billings />} />
-              <Route path="collections" element={<AdminCollections />} />
-              <Route path="users" element={<AdminUsers />} />
-            </Route>
-
-          </Routes>
+          <AppContent />
         </BrowserRouter>
       </CartProvider>
     </AuthProvider>
+  );
+}
+
+function AppContent() {
+  const { role } = useAuth();
+
+  return (
+    <Routes>
+      {/* ---------- ADMIN ---------- */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute role="Admin">
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Dashboard />} />
+        <Route path="categories" element={<AdminCategories />} />
+        <Route path="products" element={<AdminProducts />} />
+        <Route path="orders" element={<AdminOrders />} />
+        <Route path="billings" element={<Billings />} />
+        <Route path="collections" element={<AdminCollections />} />
+        <Route path="users" element={<AdminUsers />} />
+      </Route>
+
+      {/* ---------- AUTH ---------- */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
+      {/* ---------- CUSTOMER ---------- */}
+      <Route element={<CustomerLayout />}>
+        <Route
+          path="/"
+          element={
+            role === "Admin" ? <Navigate to="/admin" replace={true} /> : <Home />
+          }
+        />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/orders" element={<CustomerOrders />} />
+        <Route path="/collections/:id" element={<CollectionDetail />} />
+        <Route path="/category/:id" element={<CategoryDetail />} />
+        <Route path="/product/:id" element={<ProductDetails />} />
+      </Route>
+
+      {/* CATCH ALL */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }

@@ -7,7 +7,10 @@ export default function CollectionsSection() {
     const [collections, setCollections] = useState([]);
 
     useEffect(() => {
-        getCollections().then(res => setCollections(res.data));
+        getCollections().then(res => {
+            const sorted = res.data.sort((a, b) => (a.rank || 999) - (b.rank || 999));
+            setCollections(sorted);
+        });
     }, []);
 
     if (collections.length === 0) return null;
