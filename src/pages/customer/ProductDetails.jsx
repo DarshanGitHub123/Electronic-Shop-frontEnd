@@ -319,7 +319,7 @@ export default function ProductDetails() {
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Related Products across the store</p>
               </div>
             </div>
-            <Link to={`/category/${product.category?._id}`} className="px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-xl font-bold text-xs uppercase tracking-widest transition-colors">
+            <Link to={`/category/${product.category?._id}`} className="px-4 py-2 bg-gray-50 text-black hover:bg-gray-100 rounded-xl font-bold text-xs uppercase tracking-widest transition-colors">
               See All
             </Link>
           </div>

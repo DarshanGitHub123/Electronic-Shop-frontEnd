@@ -43,8 +43,9 @@ export default function Navbar() {
     if (!searchQuery.trim()) return [];
     const query = searchQuery.toLowerCase().trim();
     return products.filter(p =>
-      (p.title || "").toLowerCase().includes(query) ||
-      (p.description || "").toLowerCase().includes(query)
+      (p.name || "").toLowerCase().includes(query) ||
+      (p.description || "").toLowerCase().includes(query) ||
+      (p.category?.categoryName || "").toLowerCase().includes(query)
     ).slice(0, 8); // Limit to 8 suggestions
   }, [searchQuery, products]);
 
