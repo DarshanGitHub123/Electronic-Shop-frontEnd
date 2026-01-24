@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   getAllOrders,
   updateOrderStatus,
+  updateOrderPayment,
 } from "../../api/order.api";
 import { getProductById } from "../../api/product.api";
 import { PackageCheck } from "lucide-react";
@@ -30,6 +31,11 @@ export default function AdminOrders() {
 
   const changeStatus = async (id, status) => {
     await updateOrderStatus(id, { status });
+    loadOrders();
+  };
+
+  const markAsPaid = async (id) => {
+    await updateOrderPayment(id, { status: "Paid" });
     loadOrders();
   };
 
@@ -71,7 +77,7 @@ export default function AdminOrders() {
           <PackageCheck size={20} />
         </div>
         <h1 className="text-xl font-semibold tracking-wide">
-          Orders
+          Orders Management
         </h1>
       </div>
 
@@ -93,8 +99,8 @@ export default function AdminOrders() {
             {/* HEADER */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
               <div>
-                <p className="text-sm font-semibold">
-                  Order #{order._id.slice(-6)}
+                <p className="text-sm font-semibold text-white">
+                  Order #{order._id.slice(-6).toUpperCase()}
                 </p>
                 <p className="text-xs text-white/60">
                   {new Date(order.createdAt).toLocaleString()}
@@ -102,14 +108,16 @@ export default function AdminOrders() {
               </div>
 
               <span
-                className={`text-xs px-3 py-1 rounded-xl w-fit
+                className={`text-xs px-3 py-1 rounded-xl w-fit font-bold
                   ${order.status === "Pending"
                     ? "bg-yellow-500/20 text-yellow-300"
-                    : order.status === "OutForDelivery"
-                      ? "bg-blue-500/20 text-blue-300"
-                      : order.status === "Delivered"
-                        ? "bg-green-500/20 text-green-300"
-                        : "bg-red-500/20 text-red-300"
+                    : order.status === "Accepted"
+                      ? "bg-purple-500/20 text-purple-300"
+                      : order.status === "OutForDelivery"
+                        ? "bg-blue-500/20 text-blue-300"
+                        : order.status === "Delivered"
+                          ? "bg-green-500/20 text-green-300"
+                          : "bg-red-500/20 text-red-300"
                   }`}
               >
                 {order.status}
@@ -120,7 +128,7 @@ export default function AdminOrders() {
             <div className="border-t border-white/10 pt-3 text-sm">
               <p>
                 <span className="text-white/60">Customer:</span>{" "}
-                <span className="font-medium">
+                <span className="font-medium text-white">
                   {order.user?.name}
                 </span>
               </p>
@@ -163,7 +171,7 @@ export default function AdminOrders() {
 
             {/* DELIVERY ADDRESS */}
             <div className="border-t border-white/10 pt-3 text-sm">
-              <p className="font-medium mb-1">
+              <p className="font-medium mb-1 text-white">
                 Delivery Address
               </p>
               <p className="text-xs text-white/70 leading-5">
@@ -181,34 +189,46 @@ export default function AdminOrders() {
             </div>
 
             {/* PAYMENT */}
-            <div className="border-t border-white/10 pt-3 flex flex-col sm:flex-row sm:justify-between gap-2 text-sm">
-              <p>
-                <span className="text-white/60">
-                  Payment Method:
-                </span>{" "}
-                {order.paymentDetails?.method}
-              </p>
+            <div className="border-t border-white/10 pt-3 flex flex-col sm:flex-row sm:justify-between gap-2 text-sm items-center">
+              <div className="flex gap-4">
+                <p>
+                  <span className="text-white/60">
+                    Method:
+                  </span>{" "}
+                  <span className="text-white">{order.paymentDetails?.method}</span>
+                </p>
 
-              <p>
-                <span className="text-white/60">
-                  Payment Status:
-                </span>{" "}
-                <span
-                  className={`text-xs px-2 py-1 rounded ml-1
-                    ${order.paymentDetails?.status === "Paid"
-                      ? "bg-green-500/20 text-green-300"
-                      : "bg-yellow-500/20 text-yellow-300"
-                    }`}
+                <p>
+                  <span className="text-white/60">
+                    Status:
+                  </span>{" "}
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded ml-1 font-bold
+                      ${order.paymentDetails?.status === "Paid"
+                        ? "bg-green-500/20 text-green-300"
+                        : "bg-yellow-500/20 text-yellow-300"
+                      }`}
+                  >
+                    {order.paymentDetails?.status}
+                  </span>
+                </p>
+              </div>
+
+              {/* PAY BUTTON */}
+              {order.status !== "Pending" && order.status !== "Rejected" && order.paymentDetails?.status === "Pending" && (
+                <button
+                  onClick={() => markAsPaid(order._id)}
+                  className="px-4 py-1.5 rounded-xl text-xs bg-green-600 hover:bg-green-700 text-white font-bold transition shadow-lg"
                 >
-                  {order.paymentDetails?.status}
-                </span>
-              </p>
+                  Mark as Paid
+                </button>
+              )}
             </div>
 
             {/* ITEMS */}
             <div className="border-t border-white/10 pt-3">
               <div className="flex justify-between items-center mb-2">
-                <p className="text-sm font-medium">
+                <p className="text-sm font-medium text-white">
                   Items
                 </p>
                 <button
@@ -217,8 +237,9 @@ export default function AdminOrders() {
                     px-4 py-1.5
                     rounded-xl
                     text-xs
-                    bg-gradient-to-r from-indigo-500 to-indigo-600
-                    hover:scale-[1.03]
+                    bg-indigo-600
+                    hover:bg-indigo-700
+                    text-white
                     transition
                   "
                 >
@@ -242,10 +263,10 @@ export default function AdminOrders() {
                       {item.quantity}
                     </span>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-white">
                       <span>
-                        ₹{item.product?.price *
-                          item.quantity}
+                        ₹{(Number(item.price) *
+                          item.quantity) || 0}
                       </span>
 
                       {status && (
@@ -265,30 +286,63 @@ export default function AdminOrders() {
                   </div>
                 );
               })}
+              <div className="flex justify-between items-center mt-3 pt-3 border-t border-white/5">
+                <span className="text-sm text-white/60">Grand Total</span>
+                <span className="text-lg font-bold text-orange-400">₹{order.totalAmount}</span>
+              </div>
             </div>
 
             {/* ACTIONS */}
-            <div className="border-t border-white/10 pt-3 flex flex-wrap gap-2">
-              {[
-                "Pending",
-                "OutForDelivery",
-                "Delivered",
-                "Rejected",
-              ].map((s) => (
-                <button
-                  key={s}
-                  onClick={() =>
-                    changeStatus(order._id, s)
-                  }
-                  className={`px-4 py-1.5 rounded-xl text-xs transition
-                    ${order.status === s
-                      ? "bg-orange-500 text-white"
-                      : "bg-white/10 hover:bg-white/20"
-                    }`}
-                >
-                  {s}
-                </button>
-              ))}
+            <div className="border-t border-white/10 pt-3 space-y-3">
+              <p className="text-xs text-white/40 font-bold uppercase tracking-wider">Update Order Status</p>
+              <div className="flex flex-wrap gap-2">
+                {order.status === "Pending" && (
+                  <>
+                    <button
+                      onClick={() => changeStatus(order._id, "Accepted")}
+                      className="px-6 py-2 rounded-xl text-xs font-bold bg-green-600 hover:bg-green-700 text-white transition shadow-lg"
+                    >
+                      Accept Order
+                    </button>
+                    <button
+                      onClick={() => changeStatus(order._id, "Rejected")}
+                      className="px-6 py-2 rounded-xl text-xs font-bold bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 transition shadow-lg"
+                    >
+                      Reject Order
+                    </button>
+                  </>
+                )}
+
+                {order.status === "Accepted" && (
+                  <>
+                    <button
+                      onClick={() => changeStatus(order._id, "OutForDelivery")}
+                      className="px-6 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition shadow-lg"
+                    >
+                      Out For Delivery
+                    </button>
+                    <button
+                      onClick={() => changeStatus(order._id, "Delivered")}
+                      className="px-6 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition shadow-lg"
+                    >
+                      Mark Delivered
+                    </button>
+                  </>
+                )}
+
+                {order.status === "OutForDelivery" && (
+                  <button
+                    onClick={() => changeStatus(order._id, "Delivered")}
+                    className="px-6 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition shadow-lg"
+                  >
+                    Mark Delivered
+                  </button>
+                )}
+
+                {(order.status === "Delivered" || order.status === "Rejected") && (
+                  <p className="text-xs text-white/40 italic">This order is in a final state and cannot be changed.</p>
+                )}
+              </div>
             </div>
           </div>
         ))}
