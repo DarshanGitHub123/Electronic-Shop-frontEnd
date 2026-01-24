@@ -38,7 +38,7 @@ export default function AdminSidebar() {
       {/* LOGO */}
       <div className="flex items-center justify-center md:justify-start gap-2 px-2">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center font-bold">
-          S
+          E
         </div>
         <span className="hidden md:block text-lg font-semibold tracking-wide">
           Admin Panel
@@ -57,10 +57,9 @@ export default function AdminSidebar() {
               className={`
                 group relative flex items-center gap-3
                 px-3 py-2.5 rounded-xl transition-all
-                ${
-                  active
-                    ? "bg-white/25 text-white shadow-inner"
-                    : "hover:bg-white/15 text-white/80"
+                ${active
+                  ? "bg-white/25 text-white shadow-inner"
+                  : "hover:bg-white/15 text-white/80"
                 }
               `}
             >
@@ -73,10 +72,9 @@ export default function AdminSidebar() {
               <div
                 className={`
                   w-9 h-9 rounded-xl flex items-center justify-center
-                  ${
-                    active
-                      ? "bg-gradient-to-br from-orange-500 to-orange-600"
-                      : "bg-white/10 group-hover:bg-white/20"
+                  ${active
+                    ? "bg-gradient-to-br from-orange-500 to-orange-600"
+                    : "bg-white/10 group-hover:bg-white/20"
                   }
                 `}
               >

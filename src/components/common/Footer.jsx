@@ -73,11 +73,7 @@ export default function Footer() {
                   Track Order
                 </a>
               </li>
-              <li>
-                <a href="#" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
-                  Wishlist
-                </a>
-              </li>
+
             </ul>
           </div>
 
@@ -86,29 +82,29 @@ export default function Footer() {
             <h3 className="font-bold text-lg mb-4 text-white">Customer Service</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
+                <Link to="/help-center" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
                   Help Center
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
+                <Link to="/returns-refunds" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
                   Returns & Refunds
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
+                <Link to="/shipping-info" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
                   Shipping Info
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
+                <Link to="/privacy-policy" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
+                <Link to="/terms-conditions" className="text-sm text-gray-400 hover:text-blue-400 transition-colors">
                   Terms & Conditions
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

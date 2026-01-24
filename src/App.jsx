@@ -25,6 +25,13 @@ import AdminUsers from "./pages/admin/Users";
 import Billings from "./pages/admin/Billings";
 import AdminCollections from "./pages/admin/Collections";
 
+// Static Pages
+import HelpCenter from "./pages/static/HelpCenter";
+import ReturnsRefunds from "./pages/static/ReturnsRefunds";
+import ShippingInfo from "./pages/static/ShippingInfo";
+import PrivacyPolicy from "./pages/static/PrivacyPolicy";
+import TermsConditions from "./pages/static/TermsConditions";
+
 export default function App() {
   return (
     <AuthProvider>
@@ -79,6 +86,13 @@ function AppContent() {
         <Route path="/collections/:id" element={<CollectionDetail />} />
         <Route path="/category/:id" element={<CategoryDetail />} />
         <Route path="/product/:id" element={<ProductDetails />} />
+
+        {/* STATIC PAGES */}
+        <Route path="/help-center" element={<HelpCenter />} />
+        <Route path="/returns-refunds" element={<ReturnsRefunds />} />
+        <Route path="/shipping-info" element={<ShippingInfo />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-conditions" element={<TermsConditions />} />
       </Route>
 
       {/* CATCH ALL */}
