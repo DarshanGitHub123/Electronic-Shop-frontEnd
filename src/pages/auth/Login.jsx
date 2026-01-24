@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { loginUser } from "../../api/auth.api";
+import { loginUser, googleLogin } from "../../api/auth.api";
 import { useAuth } from "../../context/AuthContext";
 import { Eye, EyeOff } from "lucide-react";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -39,6 +40,25 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError("");
+    setLoading(true);
+    try {
+      const res = await googleLogin({ credential: credentialResponse.credential });
+      const { token, role } = res.data;
+      login(token, role);
+      role === "Admin" ? navigate("/admin") : navigate("/");
+    } catch (err) {
+      setError(err.response?.data?.message || "Google login failed. Make sure you are registered.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Google Sign-In was unsuccessful. Try again later");
   };
 
   return (
@@ -123,6 +143,26 @@ export default function Login() {
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-white/10"></span>
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-slate-800 px-2 text-white/40">Or continue with</span>
+          </div>
+        </div>
+
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            theme="filled_black"
+            shape="pill"
+            text="signin_with"
+            width="100%"
+          />
+        </div>
 
         {/* FOOTER */}
         <p className="text-xs text-center text-white/60">
