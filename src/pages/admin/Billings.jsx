@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { getAllOrders } from "../../api/order.api";
 import { FileText, Printer } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function Billings() {
   const [orders, setOrders] = useState([]);
@@ -26,6 +27,7 @@ export default function Billings() {
 
     if (!content) return;
 
+    toast.info("Preparing invoice for print...");
     const original = document.body.innerHTML;
 
     document.body.innerHTML = `

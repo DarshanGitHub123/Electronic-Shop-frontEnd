@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { SearchProvider } from "./context/SearchContext";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import CustomerLayout from "./layouts/CustomerLayout";
 import AdminLayout from "./layouts/AdminLayout";
@@ -41,6 +43,7 @@ export default function App() {
           <BrowserRouter>
             <AppContent />
           </BrowserRouter>
+          <ToastContainer position="bottom-right" theme="dark" />
         </SearchProvider>
       </CartProvider>
     </AuthProvider>

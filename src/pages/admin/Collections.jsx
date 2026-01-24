@@ -8,6 +8,7 @@ import {
 } from "../../api/collection.api";
 import { getProducts } from "../../api/product.api";
 import { LayoutGrid, GripVertical, Loader2, X, Info } from "lucide-react";
+import { toast } from "react-toastify";
 import {
   DndContext,
   closestCenter,
@@ -149,8 +150,10 @@ export default function Collections() {
 
       reset();
       await loadData();
+      toast.success(editId ? "Collection updated!" : "Collection created!");
     } catch (error) {
       console.error("Error submitting collection:", error);
+      toast.error("Failed to save collection");
     } finally {
       setLoading(false);
     }
@@ -174,8 +177,13 @@ export default function Collections() {
 
   const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this collection?")) {
-      await deleteCollection(id);
-      loadData();
+      try {
+        await deleteCollection(id);
+        loadData();
+        toast.info("Collection deleted");
+      } catch {
+        toast.error("Delete failed");
+      }
     }
   };
 

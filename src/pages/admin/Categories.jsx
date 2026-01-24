@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import {
   getCategories,
   createCategory,
   updateCategory,
   deleteCategory,
 } from "../../api/category.api";
-import { Layers, CheckCircle, Pencil, Trash2, X } from "lucide-react";
+import { Layers, Pencil, Trash2, X } from "lucide-react";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
@@ -57,7 +58,7 @@ export default function AdminCategories() {
     );
 
     if (alreadyExists) {
-      setError("Category already exists");
+      toast.error("Category already exists");
       return;
     }
 
@@ -66,18 +67,16 @@ export default function AdminCategories() {
     try {
       if (editId) {
         await updateCategory(editId, { categoryName: name, description });
-        setSuccess("Category updated successfully");
+        toast.success("Category updated!");
       } else {
         await createCategory({ categoryName: name, description });
-        setSuccess("Category created successfully");
+        toast.success("Category created!");
       }
 
       resetForm();
       loadCategories();
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Operation failed"
-      );
+      toast.error(err.response?.data?.message || "Operation failed");
     } finally {
       setLoading(false);
     }
@@ -92,8 +91,6 @@ export default function AdminCategories() {
       categoryName: category.categoryName,
       description: category.description,
     });
-    setError("");
-    setSuccess("");
   };
 
   /* ===============================
@@ -135,21 +132,6 @@ export default function AdminCategories() {
         <h2 className="text-sm font-medium text-white/80">
           {editId ? "Edit Category" : "Add New Category"}
         </h2>
-
-        {/* ERROR */}
-        {error && (
-          <div className="text-xs bg-red-500/20 text-red-300 border border-red-500/30 px-4 py-2 rounded-xl">
-            {error}
-          </div>
-        )}
-
-        {/* SUCCESS */}
-        {success && (
-          <div className="flex items-center gap-2 text-xs bg-green-500/20 text-green-300 border border-green-500/30 px-4 py-2 rounded-xl">
-            <CheckCircle size={14} />
-            {success}
-          </div>
-        )}
 
         {/* NAME */}
         <input

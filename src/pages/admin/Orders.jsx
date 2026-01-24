@@ -6,6 +6,7 @@ import {
 } from "../../api/order.api";
 import { getProductById } from "../../api/product.api";
 import { PackageCheck } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
@@ -30,13 +31,23 @@ export default function AdminOrders() {
   }, []);
 
   const changeStatus = async (id, status) => {
-    await updateOrderStatus(id, { status });
-    loadOrders();
+    try {
+      await updateOrderStatus(id, { status });
+      loadOrders();
+      toast.success(`Order ${status}!`);
+    } catch {
+      toast.error("Failed to update status");
+    }
   };
 
   const markAsPaid = async (id) => {
-    await updateOrderPayment(id, { status: "Paid" });
-    loadOrders();
+    try {
+      await updateOrderPayment(id, { status: "Paid" });
+      loadOrders();
+      toast.success("Payment confirmed!");
+    } catch {
+      toast.error("Payment update failed");
+    }
   };
 
   const checkInventory = async (order) => {

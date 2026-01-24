@@ -7,6 +7,7 @@ import {
 } from "../../api/product.api";
 import { getCategories } from "../../api/category.api";
 import { PackagePlus, Search, Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function AdminProducts() {
   const [allProducts, setAllProducts] = useState([]);
@@ -131,8 +132,10 @@ export default function AdminProducts() {
 
       resetForm();
       refreshProducts();
+      toast.success(editId ? "Product updated successfully!" : "Product created successfully!");
     } catch (error) {
       console.error("SUBMIT ERROR:", error);
+      toast.error(error.response?.data?.message || "Failed to save product");
     } finally {
       setIsSubmitting(false);
     }
@@ -489,7 +492,10 @@ export default function AdminProducts() {
                     </button>
                     <button
                       onClick={() =>
-                        deleteProduct(p._id).then(refreshProducts)
+                        deleteProduct(p._id).then(() => {
+                          refreshProducts();
+                          toast.info("Product deleted");
+                        }).catch(() => toast.error("Delete failed"))
                       }
                       className="flex-1 py-2 text-xs font-bold bg-red-500 text-white rounded-xl shadow-lg active:scale-95 transition"
                     >
@@ -531,7 +537,10 @@ export default function AdminProducts() {
                           </button>
                           <button
                             onClick={() =>
-                              deleteProduct(p._id).then(refreshProducts)
+                              deleteProduct(p._id).then(() => {
+                                refreshProducts();
+                                toast.info("Product deleted");
+                              }).catch(() => toast.error("Delete failed"))
                             }
                             className="p-2 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-xl transition"
                           >
