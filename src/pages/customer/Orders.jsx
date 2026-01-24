@@ -21,6 +21,7 @@ export default function Orders() {
       case "delivered":
         return "bg-green-100 text-green-700 border-green-300";
       case "cancelled":
+      case "rejected":
         return "bg-red-100 text-red-700 border-red-300";
       default:
         return "bg-gray-100 text-gray-700 border-gray-300";
@@ -37,6 +38,7 @@ export default function Orders() {
       case "delivered":
         return <CheckCircle className="w-4 h-4" />;
       case "cancelled":
+      case "rejected":
         return <XCircle className="w-4 h-4" />;
       default:
         return <Package className="w-4 h-4" />;
@@ -107,6 +109,11 @@ export default function Orders() {
                       {getStatusIcon(order.status)}
                       {order.status}
                     </span>
+                    {order.status === "Rejected" && (
+                      <span className="text-xs font-medium text-red-600 dark:text-red-400 italic">
+                        — Items are out of stock
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                     <Calendar className="w-4 h-4" />
@@ -117,7 +124,7 @@ export default function Orders() {
                 {/* Total Amount */}
                 <div className="text-right">
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Amount</p>
-                  <p className="text-2xl font-bold text-blue-600">₹{order.totalAmount}</p>
+                  <p className="text-2xl font-bold text-blue-600">₹{order.totalAmount || "0"}</p>
                 </div>
               </div>
 
@@ -173,7 +180,7 @@ export default function Orders() {
                       {/* Item Total */}
                       <div className="text-right">
                         <p className="font-semibold text-gray-800 dark:text-white">
-                          ₹{item.quantity * item.price}
+                          ₹{(Number(item.quantity) * Number(item.price)) || "0"}
                         </p>
                       </div>
                     </div>
@@ -203,9 +210,15 @@ export default function Orders() {
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       Current Status: <span className="font-medium">{order.status}</span>
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Expected: <span className="font-medium">3-5 Business Days</span>
-                    </p>
+                    {order.status === "Rejected" ? (
+                      <p className="text-xs text-red-600 font-bold mt-1">
+                        Reason: Items are out of stock
+                      </p>
+                    ) : (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Expected: <span className="font-medium">3-5 Business Days</span>
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

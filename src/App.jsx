@@ -15,6 +15,7 @@ import CategoryDetail from "./pages/customer/CategoryDetail";
 import ProductDetails from "./pages/customer/ProductDetails";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import AdminRegister from "./pages/auth/AdminRegister";
 
 // Admin Pages
 import Dashboard from "./pages/admin/Dashboard";
@@ -72,6 +73,7 @@ function AppContent() {
       {/* ---------- AUTH ---------- */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/admin/register" element={<AdminRegister />} />
 
       {/* ---------- CUSTOMER ---------- */}
       <Route element={<CustomerLayout />}>
