@@ -195,10 +195,12 @@ export default function Orders() {
                       <h5 className="font-semibold text-gray-800 dark:text-white">Payment Info</h5>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Payment Method: <span className="font-medium">Online</span>
+                      Payment Method: <span className="font-medium">{order.paymentDetails?.method || "N/A"}</span>
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Status: <span className="font-medium text-green-600">Paid</span>
+                      Status: <span className={`font-medium ${order.paymentDetails?.status === 'Paid' ? 'text-green-600' : 'text-yellow-600'}`}>
+                        {order.paymentDetails?.status || "Pending"}
+                      </span>
                     </p>
                   </div>
 
