@@ -73,13 +73,13 @@ function SortableCollectionCard({ collection, index, onEdit, onDelete, onViewDet
       <div className="flex flex-wrap items-center gap-2 mt-4">
         <button
           onClick={() => onEdit(collection)}
-          className="px-3 py-1 bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 text-xs rounded-lg transition-colors"
+          className="px-3 py-1 bg-indigo-500 text-white hover:bg-indigo-500/30 text-xs rounded-lg transition-colors"
         >
           Edit
         </button>
         <button
           onClick={() => onDelete(collection._id)}
-          className="px-3 py-1 bg-red-500/20 text-red-400 hover:bg-red-500/30 text-xs rounded-lg transition-colors"
+          className="px-3 py-1 bg-red-400 text-white hover:bg-red-500/30 text-xs rounded-lg transition-colors"
         >
           Delete
         </button>

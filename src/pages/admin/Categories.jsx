@@ -202,7 +202,7 @@ export default function AdminCategories() {
           <thead className="text-white/70">
             <tr>
               <th className="p-4 text-left">Category</th>
-              <th>Description</th>
+              <th className="p-4 text-left">Description</th>
               <th className="text-right pr-4">Action</th>
             </tr>
           </thead>

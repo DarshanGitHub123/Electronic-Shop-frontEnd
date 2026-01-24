@@ -471,10 +471,10 @@ export default function AdminProducts() {
                   <td className="text-green-400">{p.discount || 0}%</td>
                   <td>{p.stock}</td>
                   <td>{p.tax}%</td>
-                  <td className="flex gap-2 p-2">
+                  <td className="flex gap-2 p-2 justify-center">
                     <button
                       onClick={() => editProduct(p)}
-                      className="text-indigo-300 text-xs"
+                      className="text-indigo-300 text-xs p-2 bg-indigo-500 rounded text-white"
                     >
                       Edit
                     </button>
@@ -482,7 +482,7 @@ export default function AdminProducts() {
                       onClick={() =>
                         deleteProduct(p._id).then(refreshProducts)
                       }
-                      className="text-red-400 text-xs"
+                      className="text-red-400 text-xs p-2 bg-red-500 rounded text-white"
                     >
                       Delete
                     </button>

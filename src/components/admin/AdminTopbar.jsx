@@ -20,32 +20,12 @@ export default function AdminTopbar() {
       ">
         {/* LEFT: SEARCH */}
         <div className="flex items-center gap-2 w-full max-w-md">
-          
+
           Admin Panel
         </div>
 
         {/* RIGHT: ACTIONS */}
         <div className="flex items-center gap-3">
-          {/* NOTIFICATION */}
-          <button
-            className="
-              relative
-              w-9 h-9
-              rounded-xl
-              flex items-center justify-center
-              bg-white/20
-              hover:bg-white/30
-              transition
-            "
-          >
-            <Bell size={18} />
-            <span className="
-              absolute -top-1 -right-1
-              w-2 h-2
-              bg-orange-500
-              rounded-full
-            " />
-          </button>
 
           {/* LOGOUT */}
           <button

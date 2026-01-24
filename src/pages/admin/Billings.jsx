@@ -161,7 +161,7 @@ export default function Billings() {
                   <th className="text-left">Qty</th>
                   <th className="text-left">Base</th>
                   <th className="text-left">Tax</th>
-                  <th className="text-left">Total</th>
+                  <th className="text-right">Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -179,7 +179,7 @@ export default function Billings() {
                       <td>{item.quantity}</td>
                       <td>₹{base.toFixed(2)}</td>
                       <td>₹{tax.toFixed(2)}</td>
-                      <td>
+                      <td className="text-right">
                         ₹{(base + tax).toFixed(2)}
                       </td>
                     </tr>
