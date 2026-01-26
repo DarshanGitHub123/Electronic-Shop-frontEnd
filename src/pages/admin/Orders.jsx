@@ -12,6 +12,12 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // 🔍 Filters
+  const [searchText, setSearchText] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
+
   // { orderId: { productId: "Available" | "Out of Stock" | "Error" } }
   const [inventoryStatus, setInventoryStatus] = useState({});
 
@@ -72,6 +78,28 @@ export default function AdminOrders() {
     }));
   };
 
+  // 🔍 FILTER LOGIC
+  const filteredOrders = orders.filter((order) => {
+    const serialMatch = order.serialNumber
+      ?.toLowerCase()
+      .includes(searchText.toLowerCase());
+
+    const phoneMatch = order.deliveryAgent?.phone?.includes(searchText);
+
+    const orderDate = new Date(order.createdAt);
+    const from = fromDate ? new Date(fromDate) : null;
+    const to = toDate ? new Date(toDate + "T23:59:59") : null;
+
+    const dateMatch =
+      (!from || orderDate >= from) &&
+      (!to || orderDate <= to);
+
+    return (serialMatch || phoneMatch) && dateMatch;
+  });
+
+
+
+
   if (loading) {
     return (
       <p className="text-sm text-white/60">
@@ -93,9 +121,34 @@ export default function AdminOrders() {
         </h1>
       </div>
 
+      {/* 🔍 SEARCH & FILTERS */}
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 flex flex-col md:flex-row gap-4">
+        <input
+          type="text"
+          placeholder="Search by Serial Number or Phone"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          className="flex-1 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none"
+        />
+
+        <input
+          type="date"
+          value={fromDate}
+          onChange={(e) => setFromDate(e.target.value)}
+          className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none"
+        />
+
+        <input
+          type="date"
+          value={toDate}
+          onChange={(e) => setToDate(e.target.value)}
+          className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none"
+        />
+      </div>
+
       {/* ORDERS LIST */}
       <div className="space-y-6">
-        {orders.map((order) => (
+        {filteredOrders.map((order) => (
           <div
             key={order._id}
             className="
