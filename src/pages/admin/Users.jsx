@@ -6,6 +6,22 @@ export default function AdminUsers() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [searchText, setSearchText] = useState("");
+
+
+  const filteredCustomers = customers.filter((user) => {
+    const emailMatch = user.email
+      ?.toLowerCase()
+      .includes(searchText.toLowerCase());
+
+    const phoneMatch =
+      user.phone?.includes(searchText) ||
+      user.mobile?.includes(searchText);
+
+    return emailMatch || phoneMatch;
+  });
+
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -55,9 +71,20 @@ export default function AdminUsers() {
 
       {/* CUSTOMER LIST */}
       <div className="space-y-4">
+        {/* 🔍 SEARCH */}
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
+          <input
+            type="text"
+            placeholder="Search by email or phone number"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none"
+          />
+        </div>
+
         {/* MOBILE VIEW cards */}
         <div className="grid grid-cols-1 gap-4 md:hidden">
-          {customers.map((user) => (
+          {filteredCustomers.map((user) => (
             <div
               key={user._id}
               className="bg-white/10 backdrop-blur-xl border border-white/30 rounded-2xl p-5 space-y-3 shadow-glass"
@@ -87,7 +114,7 @@ export default function AdminUsers() {
             </thead>
 
             <tbody>
-              {customers.map((user) => (
+              {filteredCustomers.map((user) => (
                 <tr
                   key={user._id}
                   className="border-t border-white/10 hover:bg-white/5 transition"
