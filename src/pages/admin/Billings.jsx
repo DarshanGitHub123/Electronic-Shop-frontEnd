@@ -136,6 +136,14 @@ export default function Billings() {
               </button>
             </div>
 
+            {/* Serial Number */}
+            <div className="text-sm">
+              <p>
+                <strong>Serial Number:</strong>{" "}
+                {order.serialNumber}
+              </p>
+            </div>
+
             {/* CUSTOMER */}
             <div className="text-sm">
               <p>
