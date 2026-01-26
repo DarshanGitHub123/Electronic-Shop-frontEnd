@@ -7,6 +7,12 @@ export default function Billings() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
+  // 🔍 Filters
+  const [searchText, setSearchText] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
   const invoiceRefs = useRef({});
 
   useEffect(() => {
@@ -71,6 +77,29 @@ export default function Billings() {
     (o) => o.paymentDetails?.status === "Paid"
   );
 
+
+  // ✅ PAID + FILTER LOGIC
+  const filteredPaidOrders = orders.filter((order) => {
+    // only PAID orders
+    if (order.paymentDetails?.status !== "Paid") return false;
+
+    const serialMatch = order.serialNumber
+      ?.toLowerCase()
+      .includes(searchText.toLowerCase());
+
+    const phoneMatch = order.deliveryAgent?.phone?.includes(searchText);
+
+    const orderDate = new Date(order.createdAt);
+    const from = fromDate ? new Date(fromDate) : null;
+    const to = toDate ? new Date(toDate + "T23:59:59") : null;
+
+    const dateMatch =
+      (!from || orderDate >= from) &&
+      (!to || orderDate <= to);
+
+    return (serialMatch || phoneMatch) && dateMatch;
+  });
+
   return (
     <div className="space-y-8">
 
@@ -84,7 +113,35 @@ export default function Billings() {
         </h1>
       </div>
 
-      {paidOrders.map((order) => {
+
+      {/* 🔍 SEARCH & FILTERS */}
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 flex flex-col md:flex-row gap-4">
+        <input
+          type="text"
+          placeholder="Search by Serial Number or Phone"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          className="flex-1 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none"
+        />
+
+        <input
+          type="date"
+          value={fromDate}
+          onChange={(e) => setFromDate(e.target.value)}
+          className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none"
+        />
+
+        <input
+          type="date"
+          value={toDate}
+          onChange={(e) => setToDate(e.target.value)}
+          className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none"
+        />
+      </div>
+
+
+
+      {filteredPaidOrders.map((order) => {
         let subTotal = 0;
         let totalTax = 0;
 
@@ -162,6 +219,11 @@ export default function Billings() {
                 <p className="text-xs italic text-white/90">"{order.customizationDescription}"</p>
               </div>
             )}
+
+
+
+
+
 
             {/* ITEMS */}
             <div className="space-y-4">
