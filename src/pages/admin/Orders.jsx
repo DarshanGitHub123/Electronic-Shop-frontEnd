@@ -136,6 +136,18 @@ export default function AdminOrders() {
               </span>
             </div>
 
+
+            {/* Serial Number */}
+            <div className="border-t border-white/10 pt-3 text-sm">
+              <p>
+                <span className="text-white/60">Serial Number:</span>{" "}
+                <span className="font-medium text-white">
+                  {order.serialNumber}
+                </span>
+              </p>
+
+            </div>
+
             {/* CUSTOMER */}
             <div className="border-t border-white/10 pt-3 text-sm">
               <p>
