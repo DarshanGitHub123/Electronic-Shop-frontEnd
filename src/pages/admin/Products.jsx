@@ -6,7 +6,7 @@ import {
   updateProduct,
 } from "../../api/product.api";
 import { getCategories } from "../../api/category.api";
-import { PackagePlus, Search, Loader2 } from "lucide-react";
+import { PackagePlus, Search, Loader2, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function AdminProducts() {
@@ -33,7 +33,7 @@ export default function AdminProducts() {
     category: "",
   });
 
-  const [specs, setSpecs] = useState([{ key: "", value: "" }]);
+  const [specs, setSpecs] = useState([{ key: "", value: "", unit: "" }]);
 
   /* ===============================
      LOAD INITIAL DATA
@@ -51,6 +51,27 @@ export default function AdminProducts() {
     };
     loadInitialData();
   }, []);
+
+  /* ===============================
+     CATEGORY HANDLER
+     =============================== */
+  const handleCategoryChange = (catId) => {
+    setForm({ ...form, category: catId });
+
+    if (!catId) return;
+
+    // Load category-specific specifications
+    const selectedCategory = categories.find(c => c._id === catId);
+    if (selectedCategory?.specifications?.length > 0) {
+      const categorySpecs = selectedCategory.specifications.map(s => ({
+        key: s.name,
+        value: "",
+        unit: s.units?.[0] || "",
+        availableUnits: s.units || []
+      }));
+      setSpecs(categorySpecs);
+    }
+  };
 
   /* ===============================
      FRONTEND SEARCH
@@ -77,7 +98,7 @@ export default function AdminProducts() {
   };
 
   const addSpecRow = () => {
-    setSpecs([...specs, { key: "", value: "" }]);
+    setSpecs([...specs, { key: "", value: "", unit: "" }]);
   };
 
   const removeSpecRow = (index) => {
@@ -105,7 +126,9 @@ export default function AdminProducts() {
     try {
       const specifications = {};
       specs.forEach((s) => {
-        if (s.key && s.value) specifications[s.key] = s.value;
+        if (s.key && s.value) {
+          specifications[s.key] = s.unit ? `${s.value} ${s.unit}`.trim() : s.value;
+        }
       });
 
       const formData = new FormData();
@@ -157,7 +180,7 @@ export default function AdminProducts() {
     });
     setImages([]);
     setOldImages([]);    // ✅ RESET OLD IMAGES
-    setSpecs([{ key: "", value: "" }]);
+    setSpecs([{ key: "", value: "", unit: "" }]);
     setRecommended([]);
   };
 
@@ -185,10 +208,19 @@ export default function AdminProducts() {
       )
     );
 
+    // Reconstruct specs with value/unit logic if possible, or just raw
     const specArray = Object.entries(p.specifications || {}).map(
-      ([key, value]) => ({ key, value })
+      ([key, value]) => {
+        // Try to split value and unit (e.g. "16 GB")
+        const parts = String(value).split(" ");
+        return {
+          key,
+          value: parts[0],
+          unit: parts.slice(1).join(" ")
+        };
+      }
     );
-    setSpecs(specArray.length ? specArray : [{ key: "", value: "" }]);
+    setSpecs(specArray.length ? specArray : [{ key: "", value: "", unit: "" }]);
   };
 
   return (
@@ -281,9 +313,7 @@ export default function AdminProducts() {
         <select
           className="glass-input bg-white/15 text-white border border-white/30"
           value={form.category}
-          onChange={(e) =>
-            setForm({ ...form, category: e.target.value })
-          }
+          onChange={(e) => handleCategoryChange(e.target.value)}
           required
         >
           <option value="" className="bg-gray-900 text-white">
@@ -348,28 +378,47 @@ export default function AdminProducts() {
 
           <div className="space-y-3">
             {specs.map((s, i) => (
-              <div key={i} className="flex gap-2">
+              <div key={i} className="flex gap-2 items-center">
                 <input
-                  className="glass-input !py-1 text-xs"
+                  className="glass-input !py-1 text-xs basis-1/3"
                   placeholder="Key (e.g. RAM)"
                   value={s.key}
                   onChange={(e) => updateSpec(i, "key", e.target.value)}
                 />
                 <input
-                  className="glass-input !py-1 text-xs"
-                  placeholder="Value (e.g. 16GB)"
+                  className="glass-input !py-1 text-xs flex-1"
+                  placeholder="Value"
                   value={s.value}
                   onChange={(e) => updateSpec(i, "value", e.target.value)}
                 />
-                {specs.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeSpecRow(i)}
-                    className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+
+                {/* Dynamic Units Dropdown */}
+                {s.availableUnits?.length > 0 ? (
+                  <select
+                    className="glass-input !py-1 text-[10px] w-20 bg-slate-900 border-white/20"
+                    value={s.unit}
+                    onChange={(e) => updateSpec(i, "unit", e.target.value)}
                   >
-                    ×
-                  </button>
+                    {s.availableUnits.map(u => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    className="glass-input !py-1 text-xs w-16"
+                    placeholder="Unit"
+                    value={s.unit}
+                    onChange={(e) => updateSpec(i, "unit", e.target.value)}
+                  />
                 )}
+
+                <button
+                  type="button"
+                  onClick={() => removeSpecRow(i)}
+                  className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             ))}
           </div>
