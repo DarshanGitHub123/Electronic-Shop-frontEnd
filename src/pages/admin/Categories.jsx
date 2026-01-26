@@ -6,7 +6,7 @@ import {
   updateCategory,
   deleteCategory,
 } from "../../api/category.api";
-import { Layers, Pencil, Trash2, X } from "lucide-react";
+import { Layers, Pencil, Trash2, X, Loader2 } from "lucide-react";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
@@ -14,12 +14,10 @@ export default function AdminCategories() {
   const [form, setForm] = useState({
     categoryName: "",
     description: "",
+    specifications: [{ name: "", units: [""] }],
   });
 
   const [editId, setEditId] = useState(null);
-
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   /* ===============================
@@ -35,18 +33,57 @@ export default function AdminCategories() {
   }, []);
 
   /* ===============================
+     SPECIFICATION HANDLERS
+     =============================== */
+  const addSpec = () => {
+    setForm({
+      ...form,
+      specifications: [...form.specifications, { name: "", units: [""] }],
+    });
+  };
+
+  const removeSpec = (index) => {
+    setForm({
+      ...form,
+      specifications: form.specifications.filter((_, i) => i !== index),
+    });
+  };
+
+  const updateSpecName = (index, value) => {
+    const updated = [...form.specifications];
+    updated[index].name = value;
+    setForm({ ...form, specifications: updated });
+  };
+
+  const addUnit = (specIndex) => {
+    const updated = [...form.specifications];
+    updated[specIndex].units = [...updated[specIndex].units, ""];
+    setForm({ ...form, specifications: updated });
+  };
+
+  const removeUnit = (specIndex, unitIndex) => {
+    const updated = [...form.specifications];
+    updated[specIndex].units = updated[specIndex].units.filter((_, i) => i !== unitIndex);
+    setForm({ ...form, specifications: updated });
+  };
+
+  const updateUnitValue = (specIndex, unitIndex, value) => {
+    const updated = [...form.specifications];
+    updated[specIndex].units[unitIndex] = value;
+    setForm({ ...form, specifications: updated });
+  };
+
+  /* ===============================
      CREATE / UPDATE CATEGORY
      =============================== */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
 
     const name = form.categoryName.trim();
     const description = form.description.trim();
 
     if (!name || !description) {
-      setError("All fields are required");
+      toast.warn("All fields are required");
       return;
     }
 
@@ -66,10 +103,10 @@ export default function AdminCategories() {
 
     try {
       if (editId) {
-        await updateCategory(editId, { categoryName: name, description });
+        await updateCategory(editId, form);
         toast.success("Category updated!");
       } else {
-        await createCategory({ categoryName: name, description });
+        await createCategory(form);
         toast.success("Category created!");
       }
 
@@ -90,6 +127,13 @@ export default function AdminCategories() {
     setForm({
       categoryName: category.categoryName,
       description: category.description,
+      specifications: (category.specifications?.length > 0)
+        ? category.specifications.map(s => ({
+          _id: s._id,
+          name: s.name,
+          units: s.units
+        }))
+        : [{ name: "", units: [""] }],
     });
   };
 
@@ -99,8 +143,13 @@ export default function AdminCategories() {
   const removeCategory = async (id) => {
     if (!confirm("Are you sure you want to delete this category?")) return;
 
-    await deleteCategory(id);
-    loadCategories();
+    try {
+      await deleteCategory(id);
+      loadCategories();
+      toast.info("Category removed");
+    } catch {
+      toast.error("Failed to delete category");
+    }
   };
 
   /* ===============================
@@ -108,7 +157,11 @@ export default function AdminCategories() {
      =============================== */
   const resetForm = () => {
     setEditId(null);
-    setForm({ categoryName: "", description: "" });
+    setForm({
+      categoryName: "",
+      description: "",
+      specifications: [{ name: "", units: [""] }]
+    });
   };
 
   return (
@@ -127,42 +180,115 @@ export default function AdminCategories() {
       {/* CREATE / EDIT FORM */}
       <form
         onSubmit={handleSubmit}
-        className="glass p-6 rounded-2xl max-w-xl space-y-4 border border-white/30"
+        className="glass p-6 rounded-2xl max-w-2xl space-y-6 border border-white/30"
       >
-        <h2 className="text-sm font-medium text-white/80">
+        <h2 className="text-base font-semibold text-white">
           {editId ? "Edit Category" : "Add New Category"}
         </h2>
 
-        {/* NAME */}
-        <input
-          className="glass-input"
-          placeholder="Category Name *"
-          value={form.categoryName}
-          disabled={loading}
-          onChange={(e) =>
-            setForm({ ...form, categoryName: e.target.value })
-          }
-        />
+        <div className="space-y-4">
+          <input
+            className="glass-input"
+            placeholder="Category Name *"
+            value={form.categoryName}
+            disabled={loading}
+            onChange={(e) =>
+              setForm({ ...form, categoryName: e.target.value })
+            }
+          />
 
-        {/* DESCRIPTION */}
-        <textarea
-          className="glass-input resize-none"
-          placeholder="Category Description *"
-          rows="3"
-          value={form.description}
-          disabled={loading}
-          onChange={(e) =>
-            setForm({ ...form, description: e.target.value })
-          }
-        />
+          <textarea
+            className="glass-input resize-none"
+            placeholder="Category Description *"
+            rows="2"
+            value={form.description}
+            disabled={loading}
+            onChange={(e) =>
+              setForm({ ...form, description: e.target.value })
+            }
+          />
+        </div>
+
+        {/* SPECIFICATIONS SECTION */}
+        <div className="space-y-4 border-t border-white/10 pt-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-orange-400 uppercase tracking-widest">
+              Technical Specifications
+            </h3>
+            <button
+              type="button"
+              onClick={addSpec}
+              className="text-[10px] bg-orange-500/20 text-orange-300 px-3 py-1 rounded-full font-bold hover:bg-orange-500 hover:text-white transition-all uppercase"
+            >
+              + Add Specification
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {form.specifications.map((spec, specIdx) => (
+              <div key={specIdx} className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-4 relative group">
+                <button
+                  type="button"
+                  onClick={() => removeSpec(specIdx)}
+                  className="absolute top-4 right-4 text-white/20 hover:text-red-400 transition-colors"
+                >
+                  <Trash2 size={16} />
+                </button>
+
+                <div className="max-w-md">
+                  <label className="text-[10px] font-bold text-white/40 uppercase mb-1 block tracking-wider">Spec Name (e.g. Storage, RAM)</label>
+                  <input
+                    className="glass-input !py-1.5 text-sm"
+                    placeholder="Specification Name"
+                    value={spec.name}
+                    onChange={(e) => updateSpecName(specIdx, e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-white/40 uppercase block tracking-wider">Available Units (e.g. GB, TB)</label>
+                  <div className="flex flex-wrap gap-2">
+                    {spec.units.map((unit, unitIdx) => (
+                      <div key={unitIdx} className="flex items-center gap-1 group/unit">
+                        <input
+                          className="w-20 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                          placeholder="Unit"
+                          value={unit}
+                          onChange={(e) => updateUnitValue(specIdx, unitIdx, e.target.value)}
+                        />
+                        {spec.units.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeUnit(specIdx, unitIdx)}
+                            className="text-white/20 hover:text-red-400"
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => addUnit(specIdx)}
+                      className="w-8 h-8 flex items-center justify-center bg-white/5 border border-dashed border-white/20 rounded-lg text-white/40 hover:text-white hover:border-white/40 transition-all"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* ACTIONS */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 pt-4">
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full disabled:opacity-50"
+            className="btn-primary w-full disabled:opacity-50 flex items-center justify-center gap-2"
           >
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {editId ? "Update Category" : "Create Category"}
           </button>
 
@@ -170,9 +296,9 @@ export default function AdminCategories() {
             <button
               type="button"
               onClick={resetForm}
-              className="bg-white/15 px-4 py-2 rounded-xl"
+              className="bg-white/15 px-4 py-2 rounded-xl text-white hover:bg-white/20 transition"
             >
-              <X size={14} />
+              <X size={16} />
             </button>
           )}
         </div>
