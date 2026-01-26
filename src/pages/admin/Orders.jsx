@@ -334,9 +334,14 @@ export default function AdminOrders() {
                     </button>
                     <button
                       onClick={() => changeStatus(order._id, "Delivered")}
-                      className="px-6 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition shadow-lg"
+                      disabled={order.paymentDetails?.status !== "Paid"}
+                      className={`px-6 py-2 rounded-xl text-xs font-bold transition shadow-lg 
+                        ${order.paymentDetails?.status === "Paid"
+                          ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+                          : "bg-gray-500/20 text-white/20 cursor-not-allowed"
+                        }`}
                     >
-                      Mark Delivered
+                      {order.paymentDetails?.status === "Paid" ? "Mark Delivered" : "Delivered (Wait for Payment)"}
                     </button>
                   </>
                 )}
@@ -344,9 +349,14 @@ export default function AdminOrders() {
                 {order.status === "OutForDelivery" && (
                   <button
                     onClick={() => changeStatus(order._id, "Delivered")}
-                    className="px-6 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition shadow-lg"
+                    disabled={order.paymentDetails?.status !== "Paid"}
+                    className={`px-6 py-2 rounded-xl text-xs font-bold transition shadow-lg 
+                      ${order.paymentDetails?.status === "Paid"
+                        ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+                        : "bg-gray-500/20 text-white/20 cursor-not-allowed"
+                      }`}
                   >
-                    Mark Delivered
+                    {order.paymentDetails?.status === "Paid" ? "Mark Delivered" : "Delivered (Wait for Payment)"}
                   </button>
                 )}
 

@@ -27,6 +27,7 @@ import AdminOrders from "./pages/admin/Orders";
 import AdminUsers from "./pages/admin/Users";
 import Billings from "./pages/admin/Billings";
 import AdminCollections from "./pages/admin/Collections";
+import AdminBanners from "./pages/admin/Banners";
 
 // Static Pages
 import HelpCenter from "./pages/static/HelpCenter";
@@ -70,6 +71,7 @@ function AppContent() {
         <Route path="orders" element={<AdminOrders />} />
         <Route path="billings" element={<Billings />} />
         <Route path="collections" element={<AdminCollections />} />
+        <Route path="banners" element={<AdminBanners />} />
         <Route path="users" element={<AdminUsers />} />
       </Route>
 

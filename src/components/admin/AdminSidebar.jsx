@@ -7,6 +7,7 @@ import {
   Layers,
   Receipt,
   LayoutGrid,
+  Image as ImageIcon,
   X, // ✅ FOR CLOSE BUTTON
 } from "lucide-react";
 
@@ -15,6 +16,7 @@ const links = [
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/categories", label: "Categories", icon: Layers },
   { to: "/admin/collections", label: "Collections", icon: LayoutGrid },
+  { to: "/admin/banners", label: "Banner Images", icon: ImageIcon },
   { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { to: "/admin/billings", label: "Billings", icon: Receipt },
   { to: "/admin/users", label: "Users", icon: Users },
