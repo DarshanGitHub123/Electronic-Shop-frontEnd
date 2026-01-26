@@ -1,6 +1,7 @@
 import { useCart } from "../../context/CartContext";
 import { createOrder } from "../../api/order.api";
-import { Plus, Minus, Trash2, ShoppingBag, Tag } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Plus, Minus, Trash2, ShoppingBag, Tag, Info, ShieldCheck, Truck } from "lucide-react";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import CheckoutModal from "../../components/customer/CheckoutModal";
@@ -18,8 +19,15 @@ export default function Cart() {
   const discount = Math.floor(itemTotal * 0.05); // 5% discount
   const grandTotal = itemTotal + deliveryFee - discount;
 
+  // Check if any item is out of stock
+  const hasOutOfStockItems = cart.some(item => (item.product?.stock || 0) <= 0);
+
   const handleIncrement = async (item) => {
-    await updateQuantity(item._id, item.quantity + 1);
+    if ((item.product?.stock || 0) > item.quantity) {
+      await updateQuantity(item._id, item.quantity + 1);
+    } else {
+      toast.warn("Maximum available stock reached");
+    }
   };
 
   const handleDecrement = async (item) => {
@@ -31,6 +39,9 @@ export default function Cart() {
   };
 
   const handleCheckout = (checkoutData) => {
+    if (hasOutOfStockItems) {
+      return toast.error("Please remove out-of-stock items to proceed");
+    }
     placeOrder(checkoutData);
   };
 
@@ -70,7 +81,7 @@ export default function Cart() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto pb-20">
       <div className="grid md:grid-cols-3 gap-6">
 
         {/* Cart Items - Left Side */}
@@ -80,84 +91,99 @@ export default function Cart() {
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
               Shopping Cart
             </h2>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="text-sm text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">
               ({cart.length} {cart.length === 1 ? "item" : "items"})
             </span>
           </div>
 
           {cart.length === 0 ? (
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-12 text-center border border-gray-200 dark:border-slate-700">
-              <ShoppingBag className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-              <p className="text-lg text-gray-500 dark:text-gray-400 mb-2">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-12 text-center border border-gray-100 dark:border-slate-700 shadow-xl">
+              <ShoppingBag className="w-16 h-16 mx-auto text-gray-200 dark:text-gray-600 mb-4" />
+              <p className="text-lg font-bold text-gray-400 mb-2 uppercase tracking-tight">
                 Your cart is empty
               </p>
-              <p className="text-sm text-gray-400 dark:text-gray-500">
-                Add some products to get started!
-              </p>
+              <Link to="/" className="text-blue-600 font-bold hover:underline">Start Shopping ➔</Link>
             </div>
           ) : (
-            <div className="space-y-3">
-              {cart.map((item) => (
-                <div
-                  key={item._id}
-                  className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-gray-200 dark:border-slate-700 hover:shadow-lg transition-shadow"
-                >
-                  <div className="flex gap-4">
-                    {/* Product Image */}
-                    <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-700 dark:to-slate-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="text-2xl">📱</span>
-                    </div>
+            <div className="space-y-4">
+              {cart.map((item) => {
+                const isItemOutOfStock = (item.product?.stock || 0) <= 0;
+                return (
+                  <div
+                    key={item._id}
+                    className={`bg-white dark:bg-slate-800 rounded-2xl p-4 border transition-all duration-300 ${isItemOutOfStock ? 'border-red-200 bg-red-50/10 grayscale opacity-90' : 'border-gray-100 dark:border-slate-700 hover:shadow-xl shadow-sm'}`}
+                  >
+                    <div className="flex gap-4">
+                      {/* Product Image */}
+                      <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-700 dark:to-slate-600 rounded-xl flex items-center justify-center flex-shrink-0 relative overflow-hidden">
+                        {item.product?.images?.[0] ? (
+                          <img src={item.product.images[0]} alt={item.product.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-2xl">📱</span>
+                        )}
+                        {isItemOutOfStock && (
+                          <div className="absolute inset-0 bg-red-600/60 backdrop-blur-[1px] flex items-center justify-center">
+                            <span className="text-[8px] font-black text-white uppercase tracking-tighter">Sold Out</span>
+                          </div>
+                        )}
+                      </div>
 
-                    {/* Product Info */}
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800 dark:text-white mb-1">
-                        {item.product?.name || "Product"}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                        ₹{item.product?.price} each
-                      </p>
-
-                      {/* Quantity Controls */}
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center bg-blue-600 text-white rounded-lg overflow-hidden">
-                          <button
-                            onClick={() => handleDecrement(item)}
-                            className="px-3 py-1 hover:bg-blue-700 transition-colors"
-                          >
-                            {item.quantity === 1 ? (
-                              <Trash2 className="w-4 h-4" />
-                            ) : (
-                              <Minus className="w-4 h-4" />
-                            )}
-                          </button>
-                          <span className="font-bold px-4">{item.quantity}</span>
-                          <button
-                            onClick={() => handleIncrement(item)}
-                            className="px-3 py-1 hover:bg-blue-700 transition-colors"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
+                      {/* Product Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start gap-2">
+                          <h3 className="font-bold text-gray-800 dark:text-white truncate uppercase tracking-tight">
+                            {item.product?.name || "Product"}
+                          </h3>
+                          <p className="text-lg font-black text-gray-900 dark:text-white shrink-0">
+                            ₹{(item.product?.price || 0) * item.quantity}
+                          </p>
                         </div>
 
-                        <button
-                          onClick={() => removeFromCart(item._id)}
-                          className="text-red-500 hover:text-red-600 text-sm font-medium flex items-center gap-1"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          Remove
-                        </button>
+                        <div className="flex items-center gap-2 mt-0.5 mb-3">
+                          <p className="text-xs font-bold text-gray-400">
+                            ₹{item.product?.price} each
+                          </p>
+                          {isItemOutOfStock && (
+                            <span className="text-[10px] font-black text-red-600 uppercase tracking-widest bg-red-100 px-2 py-0.5 rounded-md">
+                              Currently Unavailable
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Controls Row */}
+                        <div className="flex items-center justify-between">
+                          <div className={`flex items-center rounded-lg overflow-hidden border ${isItemOutOfStock ? 'bg-gray-100 border-gray-200' : 'bg-blue-600 border-blue-700 shadow-md'}`}>
+                            <button
+                              onClick={() => handleDecrement(item)}
+                              className={`px-3 py-1.5 transition-colors ${isItemOutOfStock ? 'text-gray-400 cursor-not-allowed' : 'text-white hover:bg-black/10'}`}
+                            >
+                              {item.quantity === 1 ? <Trash2 size={14} /> : <Minus size={14} />}
+                            </button>
+                            <span className={`font-black px-4 text-sm ${isItemOutOfStock ? 'text-gray-400' : 'text-white'}`}>
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => handleIncrement(item)}
+                              disabled={isItemOutOfStock}
+                              className={`px-3 py-1.5 transition-colors ${isItemOutOfStock ? 'text-gray-400 cursor-not-allowed' : 'text-white hover:bg-black/10'}`}
+                            >
+                              <Plus size={14} />
+                            </button>
+                          </div>
+
+                          <button
+                            onClick={() => removeFromCart(item._id)}
+                            className="text-gray-400 hover:text-red-500 transition-colors p-2"
+                            title="Remove item"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
                       </div>
                     </div>
-
-                    {/* Item Total */}
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-gray-800 dark:text-white">
-                        ₹{(item.product?.price || 0) * item.quantity}
-                      </p>
-                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -165,66 +191,73 @@ export default function Cart() {
         {/* Bill Summary - Right Side */}
         {cart.length > 0 && (
           <div className="md:col-span-1">
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-gray-200 dark:border-slate-700 sticky top-24">
-              <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                Bill Summary
+            <div className={`bg-white dark:bg-slate-800 rounded-3xl p-6 border shadow-2xl sticky top-24 space-y-6 ${hasOutOfStockItems ? 'border-red-500/30' : 'border-gray-100'}`}>
+              <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight border-b pb-4">
+                Summary
               </h3>
 
-              <div className="space-y-3 mb-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">Item Total</span>
-                  <span className="font-medium text-gray-800 dark:text-white">₹{itemTotal}</span>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm font-bold">
+                  <span className="text-gray-400 uppercase tracking-widest">Subtotal</span>
+                  <span className="text-gray-900 dark:text-white">₹{itemTotal}</span>
                 </div>
 
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">Delivery Fee</span>
-                  <span className="font-medium text-gray-800 dark:text-white">
-                    {deliveryFee === 0 ? (
-                      <span className="text-green-600">FREE</span>
-                    ) : (
-                      `₹${deliveryFee}`
-                    )}
+                <div className="flex justify-between text-sm font-bold">
+                  <span className="text-gray-400 uppercase tracking-widest">Delivery</span>
+                  <span className={deliveryFee === 0 ? "text-green-600" : "text-gray-900"}>
+                    {deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}
                   </span>
                 </div>
 
-                <div className="flex justify-between text-sm">
-                  <span className="text-green-600 flex items-center gap-1">
-                    <Tag className="w-4 h-4" />
-                    Discount (5%)
+                <div className="flex justify-between text-sm font-bold">
+                  <span className="text-green-600 flex items-center gap-1 uppercase tracking-widest">
+                    <Tag size={14} /> Discount
                   </span>
-                  <span className="font-medium text-green-600">-₹{discount}</span>
+                  <span className="text-green-600">-₹{discount}</span>
                 </div>
 
                 {itemTotal < 500 && itemTotal > 0 && (
-                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                    <p className="text-xs text-blue-700 dark:text-blue-300">
-                      Add ₹{500 - itemTotal} more to get FREE delivery! 🚚
+                  <div className="bg-blue-50 dark:bg-blue-900/10 rounded-2xl p-4 border border-blue-100 flex items-center gap-3">
+                    <Truck size={20} className="text-blue-600" />
+                    <p className="text-[10px] font-bold text-blue-700 uppercase tracking-tight leading-tight">
+                      Add ₹{500 - itemTotal} more for FREE delivery!
                     </p>
                   </div>
                 )}
               </div>
 
-              <div className="border-t border-gray-200 dark:border-slate-700 pt-3 mb-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold text-gray-800 dark:text-white">
+              <div className="border-t border-dashed border-gray-200 pt-4">
+                <div className="flex justify-between items-center mb-6">
+                  <span className="text-base font-black text-gray-900 dark:text-white uppercase tracking-tighter">
                     Grand Total
                   </span>
-                  <span className="text-2xl font-bold text-blue-600">
+                  <span className="text-3xl font-black text-blue-600">
                     ₹{grandTotal}
                   </span>
                 </div>
+
+                {hasOutOfStockItems && (
+                  <div className="mb-4 flex items-center gap-2 text-red-600 font-bold bg-red-100 p-3 rounded-xl border border-red-200 animate-pulse">
+                    <Info size={16} />
+                    <span className="text-[10px] uppercase tracking-widest leading-none">Remove out-of-stock items to proceed</span>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => !hasOutOfStockItems && setShowCheckout(true)}
+                  disabled={hasOutOfStockItems}
+                  className={`w-full font-black py-4 rounded-2xl transition-all shadow-xl active:scale-95 uppercase tracking-widest text-sm ${hasOutOfStockItems
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 shadow-none'
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white'
+                    }`}
+                >
+                  Checkout
+                </button>
               </div>
 
-              <button
-                onClick={() => setShowCheckout(true)}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg"
-              >
-                Proceed to Checkout
-              </button>
-
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-3">
-                Safe and secure checkout
-              </p>
+              <div className="flex items-center justify-center gap-2 text-[8px] font-black text-gray-400 uppercase tracking-widest">
+                <ShieldCheck size={12} /> SSL Secure Checkout
+              </div>
             </div>
           </div>
         )}

@@ -7,7 +7,10 @@ export default function Orders() {
   const [expandedOrder, setExpandedOrder] = useState(null);
 
   useEffect(() => {
-    getMyOrders().then(res => setOrders(res.data));
+    getMyOrders().then(res => {
+      const sortedOrders = [...res.data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setOrders(sortedOrders);
+    });
   }, []);
 
   const getStatusColor = (status) => {

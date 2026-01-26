@@ -131,11 +131,19 @@ export default function ProductDetails() {
 
         {/* 1. IMAGE GALLERY (left 5 cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="aspect-square rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-2xl flex items-center justify-center p-4">
+          <div className="aspect-square rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-2xl flex items-center justify-center p-4 relative">
             {activeImage ? (
-              <img src={activeImage} alt={product.name} className="max-h-full max-w-full object-contain hover:scale-105 transition-transform duration-500" />
+              <img src={activeImage} alt={product.name} className={`max-h-full max-w-full object-contain hover:scale-105 transition-transform duration-500 ${product.stock <= 0 ? 'grayscale' : ''}`} />
             ) : (
               <div className="text-6xl">📱</div>
+            )}
+
+            {product.stock <= 0 && (
+              <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px] flex items-center justify-center pointer-events-none">
+                <span className="bg-red-600 text-white font-black px-6 py-2 rounded-xl shadow-2xl uppercase tracking-[0.2em] text-sm">
+                  Out of Stock
+                </span>
+              </div>
             )}
           </div>
 
@@ -146,7 +154,7 @@ export default function ProductDetails() {
                 <button
                   key={i}
                   onClick={() => setActiveImage(img)}
-                  className={`w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${activeImage === img ? 'border-blue-600 ring-2 ring-blue-100' : 'border-gray-200 hover:border-gray-300'}`}
+                  className={`w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${activeImage === img ? 'border-blue-600 ring-2 ring-blue-100' : 'border-gray-200 hover:border-gray-300'} ${product.stock <= 0 ? 'grayscale opacity-50' : ''}`}
                 >
                   <img src={img} alt={`Thumb ${i}`} className="w-full h-full object-cover" />
                 </button>
@@ -169,8 +177,8 @@ export default function ProductDetails() {
               {product.name}
             </h1>
             <div className="flex items-center gap-4">
-              <span className={`text-xs font-bold px-3 py-1 rounded-full ${product.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                {product.stock > 0 ? `In Stock (${product.stock})` : 'Out of Stock'}
+              <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-sm border ${product.stock > 0 ? 'bg-green-500/10 text-green-600 border-green-500/20' : 'bg-red-500/10 text-red-600 border-red-500/20'}`}>
+                {product.stock > 0 ? `In Stock (${product.stock})` : 'Sold Out'}
               </span>
               <span className="h-4 w-[1px] bg-gray-200"></span>
               <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
@@ -180,8 +188,8 @@ export default function ProductDetails() {
           </div>
 
           <div className="p-4 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-gray-100 dark:border-slate-700">
-            <div className="flex items-baseline gap-3 mb-1">
-              <span className="text-3xl font-black text-gray-900 dark:text-white">₹{product.price}</span>
+            <div className="flex items-baseline gap-3 mb-1 text-gray-900 dark:text-white">
+              <span className="text-3xl font-black">₹{product.price}</span>
               {discount > 0 && (
                 <span className="text-lg text-gray-400 line-through">₹{originalPrice}</span>
               )}
@@ -223,10 +231,10 @@ export default function ProductDetails() {
 
         {/* 3. BUY BOX (right 3 cols) */}
         <div className="lg:col-span-3">
-          <div className="sticky top-24 p-6 bg-white dark:bg-slate-800 border-2 border-blue-600 rounded-3xl shadow-xl space-y-6">
+          <div className={`sticky top-24 p-6 bg-white dark:bg-slate-800 border-2 rounded-3xl shadow-xl space-y-6 transition-colors ${product.stock > 0 ? 'border-blue-600' : 'border-gray-200 grayscale opacity-90'}`}>
             <div className="flex items-center justify-between">
               <span className="text-xl font-bold">Total: ₹{product.price}</span>
-              <Truck size={20} className="text-blue-600" />
+              <Truck size={20} className={product.stock > 0 ? "text-blue-600" : "text-gray-400"} />
             </div>
 
             <div className="space-y-3">
@@ -235,7 +243,7 @@ export default function ProductDetails() {
                 <span>2 Year Extended Warranty</span>
               </div> */}
               <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                <RefreshCcw size={18} className="text-orange-500" />
+                <RefreshCcw size={18} className={product.stock > 0 ? "text-orange-500" : "text-gray-400"} />
                 <span>7 Days Replacement Policy</span>
               </div>
             </div>
@@ -245,23 +253,26 @@ export default function ProductDetails() {
                 {quantity === 0 ? (
                   <button
                     onClick={() => addToCart(product._id)}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-3 uppercase tracking-wider h-full"
+                    disabled={product.stock <= 0}
+                    className={`w-full font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-3 uppercase tracking-wider h-full ${product.stock > 0 ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'}`}
                   >
                     <ShoppingCart size={20} />
-                    Add to Cart
+                    {product.stock > 0 ? 'Add to Cart' : 'Unavailable'}
                   </button>
                 ) : (
-                  <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/10 p-2 rounded-xl border border-blue-100 h-full">
+                  <div className={`flex items-center justify-between p-2 rounded-xl border h-full transition-all ${product.stock > 0 ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-100' : 'bg-gray-50 border-gray-200'}`}>
                     <button
                       onClick={() => quantity === 1 ? removeFromCart(cartItem._id) : updateQuantity(cartItem._id, quantity - 1)}
-                      className="w-10 h-10 bg-white dark:bg-slate-800 rounded-lg shadow flex items-center justify-center font-bold text-xl hover:bg-gray-50 transition-colors"
+                      disabled={product.stock <= 0}
+                      className="w-10 h-10 bg-white dark:bg-slate-800 rounded-lg shadow flex items-center justify-center font-bold text-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
                     >
                       -
                     </button>
                     <span className="font-bold text-lg">{quantity}</span>
                     <button
                       onClick={() => updateQuantity(cartItem._id, quantity + 1)}
-                      className="w-10 h-10 bg-white dark:bg-slate-800 rounded-lg shadow flex items-center justify-center font-bold text-xl hover:bg-gray-50 transition-colors"
+                      disabled={product.stock <= 0 || quantity >= product.stock}
+                      className="w-10 h-10 bg-white dark:bg-slate-800 rounded-lg shadow flex items-center justify-center font-bold text-xl hover:bg-gray-50 transition-colors disabled:opacity-20"
                     >
                       +
                     </button>
@@ -271,16 +282,17 @@ export default function ProductDetails() {
 
               <div className="space-y-3">
                 {quantity > 0 && (
-                  <Link to="/cart" className="w-full bg-gray-900 dark:bg-white dark:text-gray-900 text-white text-center font-bold py-4 rounded-xl uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+                  <Link to="/cart" className="w-full bg-gray-900 dark:bg-white dark:text-gray-900 text-white text-center font-bold py-4 rounded-xl uppercase tracking-wider text-sm flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform">
                     <ShoppingBag size={18} />
                     Go to Cart
                   </Link>
                 )}
                 <button
                   onClick={handleBuyNow}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all uppercase tracking-wider"
+                  disabled={product.stock <= 0}
+                  className={`w-full font-bold py-4 rounded-xl shadow-lg transition-all uppercase tracking-wider ${product.stock > 0 ? 'bg-orange-500 hover:bg-orange-600 text-white active:scale-95' : 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300'}`}
                 >
-                  Buy it now
+                  {product.stock > 0 ? 'Buy it now' : 'Sold Out'}
                 </button>
               </div>
             </div>

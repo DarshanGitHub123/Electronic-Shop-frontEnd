@@ -18,7 +18,8 @@ export default function AdminOrders() {
   const loadOrders = async () => {
     try {
       const res = await getAllOrders();
-      setOrders(res.data);
+      const sortedOrders = [...res.data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setOrders(sortedOrders);
     } catch (err) {
       console.error("Order fetch error", err);
     } finally {
