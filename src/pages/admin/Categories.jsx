@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { toast } from "react-toastify";
 import {
   getCategories,
@@ -6,10 +6,11 @@ import {
   updateCategory,
   deleteCategory,
 } from "../../api/category.api";
-import { Layers, Pencil, Trash2, X, Loader2 } from "lucide-react";
+import { Layers, Pencil, Trash2, X, Loader2, Search } from "lucide-react";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
+  const [search, setSearch] = useState("");
 
   const [form, setForm] = useState({
     categoryName: "",
@@ -31,6 +32,16 @@ export default function AdminCategories() {
   useEffect(() => {
     loadCategories();
   }, []);
+
+  /* ===============================
+     SEARCH FILTER
+     =============================== */
+  const filteredCategories = useMemo(() => {
+    if (!search.trim()) return categories;
+    return categories.filter((c) =>
+      c.categoryName.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search, categories]);
 
   /* ===============================
      SPECIFICATION HANDLERS
@@ -172,7 +183,7 @@ export default function AdminCategories() {
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
           <Layers size={20} />
         </div>
-        <h1 className="text-xl font-semibold tracking-wide">
+        <h1 className="text-xl font-semibold tracking-wide text-white">
           Categories
         </h1>
       </div>
@@ -304,11 +315,22 @@ export default function AdminCategories() {
         </div>
       </form>
 
+      {/* SEARCH BAR (SYNCED WITH PRODUCT UI) */}
+      <div className="flex items-center gap-3 w-full md:w-[420px] bg-white/10 border border-white/30 rounded-2xl px-4 py-3 shadow-sm">
+        <Search size={18} className="text-white/40" />
+        <input
+          className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder:text-white/20"
+          placeholder="Search loaded categories..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
       {/* CATEGORY LIST */}
       <div className="space-y-4">
         {/* MOBILE VIEW cards */}
         <div className="grid grid-cols-1 gap-4 md:hidden">
-          {categories.map((c) => (
+          {filteredCategories.map((c) => (
             <div
               key={c._id}
               className="bg-white/10 backdrop-blur-xl border border-white/30 rounded-2xl p-5 space-y-4 shadow-glass"
@@ -349,7 +371,7 @@ export default function AdminCategories() {
             </thead>
 
             <tbody>
-              {categories.map((c) => (
+              {filteredCategories.map((c) => (
                 <tr
                   key={c._id}
                   className="border-t border-white/10 hover:bg-white/5 transition"
@@ -382,9 +404,9 @@ export default function AdminCategories() {
           </table>
         </div>
 
-        {categories.length === 0 && (
+        {filteredCategories.length === 0 && (
           <div className="p-10 text-center text-white/40 bg-white/5 rounded-2xl border border-dashed border-white/20">
-            No categories available
+            {search ? `No results for "${search}"` : "No categories available"}
           </div>
         )}
       </div>
