@@ -14,7 +14,7 @@ export default function HeroSection() {
       try {
         setLoading(true);
         const res = await getBanners();
-        setBanners(res.data);
+        setBanners(res.data.sort((a, b) => a.rank - b.rank));
       } catch (err) {
         console.error("Failed to fetch banners", err);
       } finally {
@@ -82,8 +82,9 @@ export default function HeroSection() {
               alt={banner.title}
               className="w-full h-full object-cover transform scale-105 group-hover:scale-110 transition-transform duration-10000"
             />
-            {/* Dark Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+            {/* Dark Overlay - Sides only */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/80" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" /> {/* Bottom shade for dots */}
           </div>
 
           {/* Content */}
