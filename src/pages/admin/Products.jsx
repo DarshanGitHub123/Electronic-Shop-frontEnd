@@ -273,8 +273,9 @@ export default function AdminProducts() {
             className="glass-input"
             placeholder="Price (₹)"
             value={form.price}
+            min="0"
             onChange={(e) =>
-              setForm({ ...form, price: e.target.value })
+              e.target.value >= 0 && setForm({ ...form, price: e.target.value })
             }
             required
           />
@@ -283,8 +284,9 @@ export default function AdminProducts() {
             className="glass-input"
             placeholder="Stock"
             value={form.stock}
+            min="0"
             onChange={(e) =>
-              setForm({ ...form, stock: e.target.value })
+              e.target.value >= 0 && setForm({ ...form, stock: e.target.value })
             }
             required
           />
@@ -293,8 +295,9 @@ export default function AdminProducts() {
             className="glass-input"
             placeholder="Tax (%)"
             value={form.tax}
+            min="0"
             onChange={(e) =>
-              setForm({ ...form, tax: e.target.value })
+              e.target.value >= 0 && setForm({ ...form, tax: e.target.value })
             }
             required
           />
@@ -303,8 +306,9 @@ export default function AdminProducts() {
             className="glass-input"
             placeholder="Discount (%)"
             value={form.discount}
+            min="0"
             onChange={(e) =>
-              setForm({ ...form, discount: e.target.value })
+              e.target.value >= 0 && setForm({ ...form, discount: e.target.value })
             }
           />
         </div>
