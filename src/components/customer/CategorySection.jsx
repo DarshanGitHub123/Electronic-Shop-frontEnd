@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { getCategories } from "../../api/category.api";
 import { Smartphone, Headphones, Laptop, Watch, Camera, Tv, Monitor, Package } from "lucide-react";
@@ -28,10 +28,29 @@ const colors = [
 
 export default function CategorySection() {
     const [categories, setCategories] = useState([]);
+    const scrollContainerRef = useRef(null);
 
     useEffect(() => {
         getCategories().then(res => setCategories(res.data));
     }, []);
+
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        const handleWheel = (e) => {
+            if (e.deltaY === 0) return;
+            e.preventDefault();
+            container.scrollLeft += e.deltaY;
+        };
+
+        // Passive: false is crucial for e.preventDefault() to work
+        container.addEventListener("wheel", handleWheel, { passive: false });
+        // Also add mouseenter/leave to help focus? No, reliable wheel should be enough.
+        // Let's also ensure style overflow is visible to events.
+
+        return () => container.removeEventListener("wheel", handleWheel);
+    }, [categories]); // Re-bind if categories change, though ref persists. Empty dep is fine mostly but let's be safe if ref updates? no ref doesn't trigger effect.
 
     return (
         <div className="py-6 scroll-smooth">
@@ -55,7 +74,18 @@ export default function CategorySection() {
                 </div>
             </div>
 
-            <div className="flex gap-4 md:gap-8 overflow-x-auto pb-4 custom-scrollbar snap-x">
+            {/* 
+              Mobile First: 
+              - Use grid with auto-flow-col for easy scrolling row.
+              - 'auto-cols-fr' or fixed width? "Listed at even distance" -> gap is uniform.
+              - "justify-between" works if items < screen width, but here we scroll. 
+              - Let's stick to flex but add 'justify-between' wrapper logic or just gap.
+              - USER REQUEST: "categories listed at even distance" 
+            */}
+            <div
+                ref={scrollContainerRef}
+                className="flex items-start gap-6 md:gap-10 overflow-x-auto pb-6 px-2 custom-scrollbar snap-x scroll-smooth w-full"
+            >
                 {categories.map((cat, index) => {
                     const Icon = getIcon(cat.categoryName);
                     const color = colors[index % colors.length];
@@ -63,7 +93,7 @@ export default function CategorySection() {
                         <Link
                             key={cat._id}
                             to={`/category/${cat._id}`}
-                            className="flex-shrink-0 flex flex-col items-center gap-3 group snap-start"
+                            className="flex-shrink-0 flex flex-col items-center gap-3 group snap-center w-20 md:w-28 text-center"
                         >
                             <div
                                 className={`w-16 h-16 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center shadow-lg group-hover:shadow-blue-500/20 group-hover:scale-110 transition-all duration-300 transform rotate-3 group-hover:rotate-0`}

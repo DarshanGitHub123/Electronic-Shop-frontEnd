@@ -1,10 +1,12 @@
 import { useCart } from "../../context/CartContext";
 import { Plus, Minus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 export default function ProductCard({ product }) {
   const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Find if this product is in cart
   const cartItem = cart.find(item => item.product?._id === product._id);
@@ -36,19 +38,35 @@ export default function ProductCard({ product }) {
     }
   };
 
+  useEffect(() => {
+    let interval;
+    if (isHovered && product.images?.length > 1) {
+      interval = setInterval(() => {
+        setActiveImageIndex((prev) => (prev + 1) % product.images.length);
+      }, 1000); // Change image every 1 second
+    } else {
+      setActiveImageIndex(0);
+    }
+    return () => clearInterval(interval);
+  }, [isHovered, product.images]);
+
   // Discount calculation
   const discount = product.discount || 0;
   const isOutOfStock = product.stock <= 0;
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100 dark:border-slate-700 ${isOutOfStock ? 'opacity-75' : ''}`}>
+    <div
+      className={`bg-white dark:bg-slate-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100 dark:border-slate-700 ${isOutOfStock ? 'opacity-75' : ''}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <Link to={`/product/${product._id}`} className="block">
         {/* Image Container */}
         <div className="relative h-40 md:h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-700 dark:to-slate-600 overflow-hidden">
           {/* Product Image */}
           {product.images?.[0] ? (
             <img
-              src={product.images[0]}
+              src={product.images[activeImageIndex] || product.images[0]}
               alt={product.name}
               className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${isOutOfStock ? 'grayscale' : ''}`}
             />
@@ -102,8 +120,8 @@ export default function ProductCard({ product }) {
             onClick={handleAdd}
             disabled={isOutOfStock}
             className={`w-full font-semibold py-2 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-md ${isOutOfStock
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
-                : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white transform hover:scale-105'
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+              : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white transform hover:scale-105'
               }`}
           >
             {isOutOfStock ? (
