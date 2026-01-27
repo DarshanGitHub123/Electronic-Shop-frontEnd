@@ -3,6 +3,7 @@ import {
   getAllOrders,
   updateOrderStatus,
   updateOrderPayment,
+  acceptOrder,
 } from "../../api/order.api";
 import { getProductById } from "../../api/product.api";
 import { PackageCheck } from "lucide-react";
@@ -44,6 +45,16 @@ export default function AdminOrders() {
       toast.success(`Order ${status}!`);
     } catch {
       toast.error("Failed to update status");
+    }
+  };
+
+  const handleAccept = async (id) => {
+    try {
+      await acceptOrder(id);
+      loadOrders();
+      toast.success("Order Accepted & Stock Updated!");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to accept order");
     }
   };
 
@@ -376,7 +387,7 @@ export default function AdminOrders() {
                 {order.status === "Pending" && (
                   <>
                     <button
-                      onClick={() => changeStatus(order._id, "Accepted")}
+                      onClick={() => handleAccept(order._id)}
                       className="px-6 py-2 rounded-xl text-xs font-bold bg-green-600 hover:bg-green-700 text-white transition shadow-lg"
                     >
                       Accept Order
