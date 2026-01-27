@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getMyOrders } from "../../api/order.api";
 import { Package, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp, Calendar, CreditCard } from "lucide-react";
 
@@ -165,16 +166,26 @@ export default function Orders() {
                       key={idx}
                       className="flex items-center gap-4 bg-white dark:bg-slate-800 p-3 rounded-lg"
                     >
-                      {/* Product Image Placeholder */}
-                      <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-700 dark:to-slate-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span className="text-2xl">📱</span>
-                      </div>
+                      {/* Product Image */}
+                      <Link to={`/product/${item.product?._id}`} className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200 dark:border-slate-700">
+                        {item.product?.images?.[0] ? (
+                          <img
+                            src={item.product.images[0]}
+                            alt={item.product?.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-slate-700">
+                            <span className="text-xl">📱</span>
+                          </div>
+                        )}
+                      </Link>
 
                       {/* Product Info */}
                       <div className="flex-1">
-                        <p className="font-medium text-gray-800 dark:text-white">
+                        <Link to={`/product/${item.product?._id}`} className="font-medium text-gray-800 dark:text-white hover:text-blue-600 transition-colors">
                           {item.product?.name || "Product"}
-                        </p>
+                        </Link>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                           Quantity: {item.quantity} × ₹{item.price}
                         </p>

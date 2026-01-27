@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import {
   fetchCart,
   addItemToCart,
@@ -26,6 +27,7 @@ export const CartProvider = ({ children }) => {
     }
     const res = await addItemToCart(productId);
     setCart(res.data);
+    toast.success("Product added to cart!");
   };
 
   const updateQuantity = async (itemId, quantity) => {
