@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   fetchCart,
   addItemToCart,
@@ -11,6 +12,7 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
+  const navigate = useNavigate();
 
   const loadCart = async () => {
     const res = await fetchCart();
@@ -18,6 +20,10 @@ export const CartProvider = ({ children }) => {
   };
 
   const addToCart = async (productId) => {
+    if (!localStorage.getItem("token")) {
+      navigate("/login");
+      return;
+    }
     const res = await addItemToCart(productId);
     setCart(res.data);
   };

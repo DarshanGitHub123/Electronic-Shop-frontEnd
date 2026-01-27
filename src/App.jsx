@@ -38,16 +38,16 @@ import TermsConditions from "./pages/static/TermsConditions";
 
 export default function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <SearchProvider>
-          <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
+        <CartProvider>
+          <SearchProvider>
             <AppContent />
-          </BrowserRouter>
-          <ToastContainer position="bottom-right" theme="dark" />
-        </SearchProvider>
-      </CartProvider>
-    </AuthProvider>
+            <ToastContainer position="bottom-right" theme="dark" />
+          </SearchProvider>
+        </CartProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
