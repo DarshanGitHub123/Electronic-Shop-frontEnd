@@ -62,7 +62,7 @@ export default function ProductCard({ product }) {
     >
       <Link to={`/product/${product._id}`} className="block">
         {/* Image Container */}
-        <div className="relative h-40 md:h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-700 dark:to-slate-600 overflow-hidden">
+        <div className="relative h-40 md:h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-white dark:to-white overflow-hidden">
           {/* Product Image */}
           {product.images?.[0] ? (
             <img
