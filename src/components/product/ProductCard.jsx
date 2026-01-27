@@ -68,7 +68,7 @@ export default function ProductCard({ product }) {
             <img
               src={product.images[activeImageIndex] || product.images[0]}
               alt={product.name}
-              className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${isOutOfStock ? 'grayscale' : ''}`}
+              className={`w-full h-full object-contain p-2 transition-opacity duration-500 ${isOutOfStock ? 'grayscale' : ''}`}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
