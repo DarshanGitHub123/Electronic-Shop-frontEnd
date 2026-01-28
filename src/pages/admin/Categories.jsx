@@ -15,7 +15,8 @@ export default function AdminCategories() {
   const [form, setForm] = useState({
     categoryName: "",
     description: "",
-    specifications: [{ name: "", units: [""] }],
+    mandatory: [{ name: "", units: [""] }],
+    optional: [{ name: "", units: [""] }],
   });
 
   const [editId, setEditId] = useState(null);
@@ -46,42 +47,42 @@ export default function AdminCategories() {
   /* ===============================
      SPECIFICATION HANDLERS
      =============================== */
-  const addSpec = () => {
+  const addSpec = (type) => {
     setForm({
       ...form,
-      specifications: [...form.specifications, { name: "", units: [""] }],
+      [type]: [...form[type], { name: "", units: [""] }],
     });
   };
 
-  const removeSpec = (index) => {
+  const removeSpec = (type, index) => {
     setForm({
       ...form,
-      specifications: form.specifications.filter((_, i) => i !== index),
+      [type]: form[type].filter((_, i) => i !== index),
     });
   };
 
-  const updateSpecName = (index, value) => {
-    const updated = [...form.specifications];
+  const updateSpecName = (type, index, value) => {
+    const updated = [...form[type]];
     updated[index].name = value;
-    setForm({ ...form, specifications: updated });
+    setForm({ ...form, [type]: updated });
   };
 
-  const addUnit = (specIndex) => {
-    const updated = [...form.specifications];
+  const addUnit = (type, specIndex) => {
+    const updated = [...form[type]];
     updated[specIndex].units = [...updated[specIndex].units, ""];
-    setForm({ ...form, specifications: updated });
+    setForm({ ...form, [type]: updated });
   };
 
-  const removeUnit = (specIndex, unitIndex) => {
-    const updated = [...form.specifications];
+  const removeUnit = (type, specIndex, unitIndex) => {
+    const updated = [...form[type]];
     updated[specIndex].units = updated[specIndex].units.filter((_, i) => i !== unitIndex);
-    setForm({ ...form, specifications: updated });
+    setForm({ ...form, [type]: updated });
   };
 
-  const updateUnitValue = (specIndex, unitIndex, value) => {
-    const updated = [...form.specifications];
+  const updateUnitValue = (type, specIndex, unitIndex, value) => {
+    const updated = [...form[type]];
     updated[specIndex].units[unitIndex] = value;
-    setForm({ ...form, specifications: updated });
+    setForm({ ...form, [type]: updated });
   };
 
   /* ===============================
@@ -138,8 +139,15 @@ export default function AdminCategories() {
     setForm({
       categoryName: category.categoryName,
       description: category.description,
-      specifications: (category.specifications?.length > 0)
-        ? category.specifications.map(s => ({
+      mandatory: (category.requirements?.mandatory?.length > 0)
+        ? category.requirements.mandatory.map(s => ({
+          _id: s._id,
+          name: s.name,
+          units: s.units
+        }))
+        : [{ name: "", units: [""] }],
+      optional: (category.requirements?.optional?.length > 0)
+        ? category.requirements.optional.map(s => ({
           _id: s._id,
           name: s.name,
           units: s.units
@@ -171,7 +179,8 @@ export default function AdminCategories() {
     setForm({
       categoryName: "",
       description: "",
-      specifications: [{ name: "", units: [""] }]
+      mandatory: [{ name: "", units: [""] }],
+      optional: [{ name: "", units: [""] }]
     });
   };
 
@@ -221,75 +230,152 @@ export default function AdminCategories() {
         </div>
 
         {/* SPECIFICATIONS SECTION */}
-        <div className="space-y-4 border-t border-white/10 pt-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-orange-400 uppercase tracking-widest">
-              Technical Specifications
-            </h3>
-            <button
-              type="button"
-              onClick={addSpec}
-              className="text-[10px] bg-orange-500/20 text-orange-300 px-3 py-1 rounded-full font-bold hover:bg-orange-500 hover:text-white transition-all uppercase"
-            >
-              + Add Specification
-            </button>
-          </div>
+        <div className="space-y-6 border-t border-white/10 pt-4">
 
-          <div className="space-y-6">
-            {form.specifications.map((spec, specIdx) => (
-              <div key={specIdx} className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-4 relative group">
-                <button
-                  type="button"
-                  onClick={() => removeSpec(specIdx)}
-                  className="absolute top-4 right-4 text-white/20 hover:text-red-400 transition-colors"
-                >
-                  <Trash2 size={16} />
-                </button>
+          {/* MANDATORY SPECIFICATIONS */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-red-400 uppercase tracking-widest">
+                ⚠️ Mandatory Specifications
+              </h3>
+              <button
+                type="button"
+                onClick={() => addSpec('mandatory')}
+                className="text-[10px] bg-red-500/20 text-red-300 px-3 py-1 rounded-full font-bold hover:bg-red-500 hover:text-white transition-all uppercase"
+              >
+                + Add Mandatory
+              </button>
+            </div>
 
-                <div className="max-w-md">
-                  <label className="text-[10px] font-bold text-white/40 uppercase mb-1 block tracking-wider">Spec Name (e.g. Storage, RAM)</label>
-                  <input
-                    className="glass-input !py-1.5 text-sm"
-                    placeholder="Specification Name"
-                    value={spec.name}
-                    onChange={(e) => updateSpecName(specIdx, e.target.value)}
-                  />
-                </div>
+            <div className="space-y-4">
+              {form.mandatory.map((spec, specIdx) => (
+                <div key={specIdx} className="bg-red-500/5 p-4 rounded-2xl border border-red-500/20 space-y-4 relative group">
+                  <button
+                    type="button"
+                    onClick={() => removeSpec('mandatory', specIdx)}
+                    className="absolute top-4 right-4 text-white/20 hover:text-red-400 transition-colors"
+                  >
+                    <Trash2 size={16} />
+                  </button>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-white/40 uppercase block tracking-wider">Available Units (e.g. GB, TB)</label>
-                  <div className="flex flex-wrap gap-2">
-                    {spec.units.map((unit, unitIdx) => (
-                      <div key={unitIdx} className="flex items-center gap-1 group/unit">
-                        <input
-                          className="w-20 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
-                          placeholder="Unit"
-                          value={unit}
-                          onChange={(e) => updateUnitValue(specIdx, unitIdx, e.target.value)}
-                        />
-                        {spec.units.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeUnit(specIdx, unitIdx)}
-                            className="text-white/20 hover:text-red-400"
-                          >
-                            <X size={14} />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => addUnit(specIdx)}
-                      className="w-8 h-8 flex items-center justify-center bg-white/5 border border-dashed border-white/20 rounded-lg text-white/40 hover:text-white hover:border-white/40 transition-all"
-                    >
-                      +
-                    </button>
+                  <div className="max-w-md">
+                    <label className="text-[10px] font-bold text-white/40 uppercase mb-1 block tracking-wider">Spec Name (e.g. Storage, RAM)</label>
+                    <input
+                      className="glass-input !py-1.5 text-sm"
+                      placeholder="Specification Name"
+                      value={spec.name}
+                      onChange={(e) => updateSpecName('mandatory', specIdx, e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-white/40 uppercase block tracking-wider">Available Units (e.g. GB, TB)</label>
+                    <div className="flex flex-wrap gap-2">
+                      {spec.units.map((unit, unitIdx) => (
+                        <div key={unitIdx} className="flex items-center gap-1 group/unit">
+                          <input
+                            className="w-20 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                            placeholder="Unit"
+                            value={unit}
+                            onChange={(e) => updateUnitValue('mandatory', specIdx, unitIdx, e.target.value)}
+                          />
+                          {spec.units.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeUnit('mandatory', specIdx, unitIdx)}
+                              className="text-white/20 hover:text-red-400"
+                            >
+                              <X size={14} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => addUnit('mandatory', specIdx)}
+                        className="w-8 h-8 flex items-center justify-center bg-white/5 border border-dashed border-white/20 rounded-lg text-white/40 hover:text-white hover:border-white/40 transition-all"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
+
+          {/* OPTIONAL SPECIFICATIONS */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-blue-400 uppercase tracking-widest">
+                ✨ Optional Specifications
+              </h3>
+              <button
+                type="button"
+                onClick={() => addSpec('optional')}
+                className="text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-bold hover:bg-blue-500 hover:text-white transition-all uppercase"
+              >
+                + Add Optional
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {form.optional.map((spec, specIdx) => (
+                <div key={specIdx} className="bg-blue-500/5 p-4 rounded-2xl border border-blue-500/20 space-y-4 relative group">
+                  <button
+                    type="button"
+                    onClick={() => removeSpec('optional', specIdx)}
+                    className="absolute top-4 right-4 text-white/20 hover:text-red-400 transition-colors"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+
+                  <div className="max-w-md">
+                    <label className="text-[10px] font-bold text-white/40 uppercase mb-1 block tracking-wider">Spec Name (e.g. Camera, Battery)</label>
+                    <input
+                      className="glass-input !py-1.5 text-sm"
+                      placeholder="Specification Name"
+                      value={spec.name}
+                      onChange={(e) => updateSpecName('optional', specIdx, e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-white/40 uppercase block tracking-wider">Available Units (e.g. MP, mAh)</label>
+                    <div className="flex flex-wrap gap-2">
+                      {spec.units.map((unit, unitIdx) => (
+                        <div key={unitIdx} className="flex items-center gap-1 group/unit">
+                          <input
+                            className="w-20 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            placeholder="Unit"
+                            value={unit}
+                            onChange={(e) => updateUnitValue('optional', specIdx, unitIdx, e.target.value)}
+                          />
+                          {spec.units.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeUnit('optional', specIdx, unitIdx)}
+                              className="text-white/20 hover:text-red-400"
+                            >
+                              <X size={14} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => addUnit('optional', specIdx)}
+                        className="w-8 h-8 flex items-center justify-center bg-white/5 border border-dashed border-white/20 rounded-lg text-white/40 hover:text-white hover:border-white/40 transition-all"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
 
         {/* ACTIONS */}
