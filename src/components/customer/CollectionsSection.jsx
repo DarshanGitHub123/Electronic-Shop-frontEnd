@@ -32,7 +32,8 @@ export default function CollectionsSection() {
                         className="group relative h-48 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
                     >
                         {/* Background Image or Gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-600 to-red-600">
+                        {/* <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-600 to-red-600"> */}
+                        <div className="absolute inset-0">
                             {collection.image ? (
                                 <img
                                     src={collection.image}
@@ -43,7 +44,7 @@ export default function CollectionsSection() {
                         </div>
 
                         {/* Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                        {/* <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" /> */}
 
                         {/* Content */}
                         <div className="absolute inset-0 p-6 flex flex-col justify-end">

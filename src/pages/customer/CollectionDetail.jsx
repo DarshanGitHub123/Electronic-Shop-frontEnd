@@ -80,7 +80,9 @@ export default function CollectionDetail() {
             {/* Collection Header */}
             <div className="relative h-64 rounded-2xl overflow-hidden mb-8 shadow-xl">
                 {/* Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-600 to-red-600">
+                {/* <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-600 to-red-600"> */}
+                {/* removed gradient overlay */}
+                <div className="absolute inset-0 ">
                     {collection.image && (
                         <img
                             src={collection.image}
@@ -91,7 +93,7 @@ export default function CollectionDetail() {
                 </div>
 
                 {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                {/* <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" /> */}
 
                 {/* Content */}
                 <div className="absolute inset-0 flex flex-col justify-end p-8">
