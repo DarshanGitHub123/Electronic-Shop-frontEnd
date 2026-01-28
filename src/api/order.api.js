@@ -9,3 +9,7 @@ export const updateOrderPayment = (id, data) =>
   api.put(`/orders/${id}/payment`, data);
 
 export const acceptOrder = (id) => api.put(`/orders/${id}/accept`);
+
+// Razorpay APIs
+export const createRazorpayOrder = (data) => api.post("/orders/razorpay/create", data);
+export const verifyRazorpayPayment = (data) => api.post("/orders/razorpay/verify", data);

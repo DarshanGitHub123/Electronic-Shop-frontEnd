@@ -1,14 +1,25 @@
 import { useCart } from "../../context/CartContext";
-import { createOrder } from "../../api/order.api";
+import { createOrder, createRazorpayOrder, verifyRazorpayPayment } from "../../api/order.api";
 import { Link } from "react-router-dom";
 import { Plus, Minus, Trash2, ShoppingBag, Tag, Info, ShieldCheck, Truck } from "lucide-react";
 import { toast } from "react-toastify";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CheckoutModal from "../../components/customer/CheckoutModal";
 
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
+
+  // Load Razorpay script
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   // Calculate totals
   const itemTotal = cart.reduce((sum, item) => {
@@ -47,33 +58,109 @@ export default function Cart() {
 
   const placeOrder = async (checkoutData) => {
     try {
-      await createOrder({
-        items: cart.map((item) => ({
-          product: item.product._id,
-          quantity: item.quantity,
-          price: item.product.price,
-        })),
-        totalAmount: grandTotal,
-        location: {
-          addressLine1: checkoutData.addressLine1,
-          addressLine2: checkoutData.addressLine2,
-          addressLine3: checkoutData.addressLine3,
-          street: checkoutData.street,
-          city: checkoutData.city,
-          state: checkoutData.state,
-          country: checkoutData.country,
-          postalCode: checkoutData.postalCode,
-        },
-        customizationDescription: checkoutData.customizationDescription,
-        paymentDetails: {
-          method: checkoutData.paymentMethod,
-          status: checkoutData.paymentMethod === "Online" ? "Paid" : "Pending",
-        },
-      });
+      // If payment method is COD, create order directly
+      if (checkoutData.paymentMethod === "COD") {
+        await createOrder({
+          items: cart.map((item) => ({
+            product: item.product._id,
+            quantity: item.quantity,
+            price: item.product.price,
+          })),
+          totalAmount: grandTotal,
+          location: {
+            addressLine1: checkoutData.addressLine1,
+            addressLine2: checkoutData.addressLine2,
+            addressLine3: checkoutData.addressLine3,
+            street: checkoutData.street,
+            city: checkoutData.city,
+            state: checkoutData.state,
+            country: checkoutData.country,
+            postalCode: checkoutData.postalCode,
+          },
+          customizationDescription: checkoutData.customizationDescription,
+          paymentDetails: {
+            method: "COD",
+            status: "Pending",
+          },
+        });
 
-      await clearCart();
-      setShowCheckout(false);
-      toast.success("Order placed successfully! 🎉");
+        await clearCart();
+        setShowCheckout(false);
+        toast.success("Order placed successfully! 🎉");
+      } else {
+        // Online payment - Initialize Razorpay
+        toast.info("Initializing payment...");
+
+        // Create Razorpay order
+        const { data: razorpayOrder } = await createRazorpayOrder({
+          amount: grandTotal,
+        });
+
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: razorpayOrder.amount,
+          currency: razorpayOrder.currency,
+          name: "Electronics Store",
+          description: "Order Payment",
+          order_id: razorpayOrder.orderId,
+          handler: async function (response) {
+            try {
+              toast.info("Verifying payment...");
+
+              // Verify payment and create order
+              const { data } = await verifyRazorpayPayment({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                orderData: {
+                  items: cart.map((item) => ({
+                    product: item.product._id,
+                    quantity: item.quantity,
+                    price: item.product.price,
+                  })),
+                  totalAmount: grandTotal,
+                  location: {
+                    addressLine1: checkoutData.addressLine1,
+                    addressLine2: checkoutData.addressLine2,
+                    addressLine3: checkoutData.addressLine3,
+                    street: checkoutData.street,
+                    city: checkoutData.city,
+                    state: checkoutData.state,
+                    country: checkoutData.country,
+                    postalCode: checkoutData.postalCode,
+                  },
+                  customizationDescription: checkoutData.customizationDescription,
+                },
+              });
+
+              await clearCart();
+              setShowCheckout(false);
+              toast.success("Payment successful! Order placed! 🎉");
+            } catch (error) {
+              console.error("Payment verification error:", error);
+              toast.error(error.response?.data?.message || "Payment verification failed");
+            }
+          },
+          prefill: {
+            name: checkoutData.addressLine1,
+            contact: "",
+          },
+          theme: {
+            color: "#2563eb",
+          },
+          modal: {
+            ondismiss: function () {
+              toast.warning("Payment cancelled");
+            },
+          },
+        };
+
+        const razorpay = new window.Razorpay(options);
+        razorpay.on("payment.failed", function (response) {
+          toast.error(`Payment failed: ${response.error.description}`);
+        });
+        razorpay.open();
+      }
     } catch (error) {
       console.error("Order error:", error);
       toast.error(error.response?.data?.message || "Failed to place order");

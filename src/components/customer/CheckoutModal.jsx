@@ -272,7 +272,7 @@ export default function CheckoutModal({ isOpen, onClose, onSubmit, itemTotal, de
                             type="submit"
                             className="flex-[2] px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl hover:shadow-2xl transition-all font-black uppercase tracking-widest text-sm"
                         >
-                            Place Order Now
+                            {formData.paymentMethod === "Online" ? "Pay and Place Order" : "Place Order Now"}
                         </button>
                     </div>
                 </form>

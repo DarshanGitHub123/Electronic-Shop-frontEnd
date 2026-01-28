@@ -33,6 +33,7 @@ export default function CollectionsSection() {
                     >
                         {/* Background Image or Gradient */}
                         {/* <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-600 to-red-600"> */}
+                        {/* removed gradient overlay */}
                         <div className="absolute inset-0">
                             {collection.image ? (
                                 <img
