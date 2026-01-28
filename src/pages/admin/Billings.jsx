@@ -96,9 +96,10 @@ export default function Billings() {
 
       doc.setFontSize(9);
       doc.text("Product", 20, yPos);
-      doc.text("Qty", 100, yPos);
-      doc.text("Base", 120, yPos);
-      doc.text("Tax", 145, yPos);
+      doc.text("Qty", 80, yPos);
+      doc.text("Base", 100, yPos);
+      doc.text("Tax", 125, yPos);
+      doc.text("Disc.", 145, yPos);
       doc.text("Total", 170, yPos);
       yPos += 5;
 
@@ -113,11 +114,12 @@ export default function Billings() {
           yPos = 20;
         }
 
-        doc.text(item.name.substring(0, 30), 20, yPos);
-        doc.text(item.quantity.toString(), 100, yPos);
-        doc.text(`₹${item.baseAmount.toFixed(2)}`, 120, yPos);
-        doc.text(`₹${item.taxAmount.toFixed(2)}`, 145, yPos);
-        doc.text(`₹${item.totalAmount.toFixed(2)}`, 170, yPos);
+        doc.text(item.name.substring(0, 25), 20, yPos);
+        doc.text(item.quantity.toString(), 80, yPos);
+        doc.text(`Rs.${item.baseAmount.toFixed(2)}`, 100, yPos);
+        doc.text(`Rs.${item.taxAmount.toFixed(2)}`, 125, yPos);
+        doc.text(`Rs.${(item.discount || 0).toFixed(2)}`, 145, yPos);
+        doc.text(`Rs.${item.totalAmount.toFixed(2)}`, 170, yPos);
         yPos += 7;
       });
 
@@ -128,16 +130,20 @@ export default function Billings() {
 
       doc.setFontSize(10);
       doc.text("Subtotal:", 120, yPos);
-      doc.text(`₹${bill.calculations.subtotal.toFixed(2)}`, 170, yPos);
+      doc.text(`Rs.${bill.calculations.subtotal.toFixed(2)}`, 170, yPos);
       yPos += 7;
 
       doc.text("Tax:", 120, yPos);
-      doc.text(`₹${bill.calculations.totalTax.toFixed(2)}`, 170, yPos);
+      doc.text(`Rs.${bill.calculations.totalTax.toFixed(2)}`, 170, yPos);
+      yPos += 7;
+
+      doc.text("Discount:", 120, yPos);
+      doc.text(`-Rs.${(bill.calculations.totalDiscount || 0).toFixed(2)}`, 170, yPos);
       yPos += 7;
 
       doc.setFontSize(12);
       doc.text("Grand Total:", 120, yPos);
-      doc.text(`₹${bill.calculations.grandTotal.toFixed(2)}`, 170, yPos);
+      doc.text(`Rs.${bill.calculations.grandTotal.toFixed(2)}`, 170, yPos);
 
       // Save PDF
       doc.save(`Invoice-${bill.billNumber}.pdf`);
@@ -246,13 +252,14 @@ export default function Billings() {
                 </p>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto mt-4 sm:mt-0">
                 <button
                   onClick={() => handleDownload(bill)}
                   className="
-                    flex items-center gap-2
-                    px-3 py-1.5 rounded-xl
+                    flex items-center justify-center gap-2
+                    px-4 py-2 rounded-xl
                     text-xs bg-green-600 text-white hover:bg-green-700 transition
+                    whitespace-nowrap font-bold shadow-lg
                   "
                 >
                   <Download size={14} />
@@ -261,9 +268,10 @@ export default function Billings() {
                 <button
                   onClick={() => handlePrint(bill._id)}
                   className="
-                    flex items-center gap-2
-                    px-3 py-1.5 rounded-xl
+                    flex items-center justify-center gap-2
+                    px-4 py-2 rounded-xl
                     text-xs bg-indigo-600 text-white hover:bg-indigo-700 transition
+                    whitespace-nowrap font-bold shadow-lg
                   "
                 >
                   <Printer size={14} />
@@ -305,9 +313,13 @@ export default function Billings() {
                           <span>Tax</span>
                           <span className="text-white text-xs">₹{item.taxAmount.toFixed(2)}</span>
                         </div>
+                        <div className="flex flex-col">
+                          <span>Discount</span>
+                          <span className="text-red-400 text-xs">-₹{(item.discount || 0).toFixed(2)}</span>
+                        </div>
                         <div className="flex flex-col items-end">
                           <span>Total</span>
-                          <span className="text-orange-400 text-xs">₹{item.totalAmount.toFixed(2)}</span>
+                          <span className="text-orange-400 text-xs font-bold">₹{item.totalAmount.toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
@@ -324,6 +336,7 @@ export default function Billings() {
                       <th className="p-3 text-center">Qty</th>
                       <th className="p-3 text-center">Base</th>
                       <th className="p-3 text-center">Tax</th>
+                      <th className="p-3 text-center">Discount</th>
                       <th className="p-3 text-right">Total</th>
                     </tr>
                   </thead>
@@ -335,6 +348,7 @@ export default function Billings() {
                           <td className="p-3 text-center">{item.quantity}</td>
                           <td className="p-3 text-center">₹{item.baseAmount.toFixed(2)}</td>
                           <td className="p-3 text-center">₹{item.taxAmount.toFixed(2)}</td>
+                          <td className="p-3 text-center text-red-400">-₹{(item.discount || 0).toFixed(2)}</td>
                           <td className="p-3 text-right font-semibold text-white">
                             ₹{item.totalAmount.toFixed(2)}
                           </td>
@@ -356,9 +370,13 @@ export default function Billings() {
                 <span>Tax</span>
                 <span>₹{bill.calculations.totalTax.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between font-semibold">
-                <span>Grand Total</span>
-                <span className="text-green-400">
+              <div className="flex justify-between text-red-400">
+                <span>Total Savings (Discount)</span>
+                <span>-₹{(bill.calculations.totalDiscount || 0).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-semibold border-t border-white/10 pt-2 mt-1">
+                <span className="text-lg">Grand Total</span>
+                <span className="text-green-400 text-xl">
                   ₹{bill.calculations.grandTotal.toFixed(2)}
                 </span>
               </div>
