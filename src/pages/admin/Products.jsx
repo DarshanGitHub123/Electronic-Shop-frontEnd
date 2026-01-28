@@ -60,16 +60,40 @@ export default function AdminProducts() {
 
     if (!catId) return;
 
-    // Load category-specific specifications
+    // Load category-specific specifications from new structure
     const selectedCategory = categories.find(c => c._id === catId);
-    if (selectedCategory?.specifications?.length > 0) {
-      const categorySpecs = selectedCategory.specifications.map(s => ({
-        key: s.name,
-        value: "",
-        unit: s.units?.[0] || "",
-        availableUnits: s.units || []
-      }));
-      setSpecs(categorySpecs);
+    if (selectedCategory?.requirements) {
+      const categorySpecs = [];
+
+      // Add mandatory specifications
+      if (selectedCategory.requirements.mandatory?.length > 0) {
+        selectedCategory.requirements.mandatory.forEach(s => {
+          categorySpecs.push({
+            key: s.name,
+            value: "",
+            unit: s.units?.[0] || "",
+            availableUnits: s.units || [],
+            isMandatory: true,  // Mark as mandatory
+            specId: s._id  // Store spec ID for reference
+          });
+        });
+      }
+
+      // Add optional specifications
+      if (selectedCategory.requirements.optional?.length > 0) {
+        selectedCategory.requirements.optional.forEach(s => {
+          categorySpecs.push({
+            key: s.name,
+            value: "",
+            unit: s.units?.[0] || "",
+            availableUnits: s.units || [],
+            isMandatory: false,  // Mark as optional
+            specId: s._id  // Store spec ID for reference
+          });
+        });
+      }
+
+      setSpecs(categorySpecs.length > 0 ? categorySpecs : [{ key: "", value: "", unit: "" }]);
     }
   };
 
@@ -418,8 +442,13 @@ export default function AdminProducts() {
 
                 <button
                   type="button"
-                  onClick={() => removeSpecRow(i)}
-                  className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                  onClick={() => !s.isMandatory && removeSpecRow(i)}
+                  disabled={s.isMandatory}
+                  title={s.isMandatory ? "Mandatory specification - cannot be deleted" : "Remove specification"}
+                  className={`p-2 rounded-lg transition-colors ${s.isMandatory
+                      ? "text-gray-400 cursor-not-allowed opacity-50"
+                      : "text-red-400 hover:bg-red-500/10"
+                    }`}
                 >
                   <Trash2 size={16} />
                 </button>
