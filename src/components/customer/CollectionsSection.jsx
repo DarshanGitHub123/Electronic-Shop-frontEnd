@@ -48,11 +48,11 @@ export default function CollectionsSection() {
                         {/* Content */}
                         <div className="absolute inset-0 p-6 flex flex-col justify-end">
                             <h3 className="text-2xl font-bold text-white mb-2 group-hover:scale-105 transition-transform">
-                                {collection.title}
+                                {collection.title || ""}
                             </h3>
                             {collection.description && (
                                 <p className="text-sm text-white/90 line-clamp-2">
-                                    {collection.description}
+                                    {collection.description || ""}
                                 </p>
                             )}
                             <div className="mt-3 inline-flex items-center text-white font-medium text-sm">

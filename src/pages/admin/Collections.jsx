@@ -146,8 +146,8 @@ export default function Collections() {
 
     try {
       const fd = new FormData();
-      fd.append("title", form.title);
-      fd.append("description", form.description);
+      fd.append("title", form.title || "");
+      fd.append("description", form.description || "");
       fd.append("products", JSON.stringify(selectedProducts));
       if (image) fd.append("image", image);
 
@@ -239,7 +239,7 @@ export default function Collections() {
           placeholder="Collection Title"
           value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
-          required
+        // required
         />
 
         <textarea
@@ -248,7 +248,7 @@ export default function Collections() {
           rows="3"
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
-          required
+        // required
         />
 
         {/* CURRENT IMAGE PREVIEW */}
