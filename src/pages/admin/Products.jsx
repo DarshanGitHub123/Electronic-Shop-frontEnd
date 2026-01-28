@@ -418,6 +418,7 @@ export default function AdminProducts() {
                   placeholder="Value"
                   value={s.value}
                   onChange={(e) => updateSpec(i, "value", e.target.value)}
+                  required
                 />
 
                 {/* Dynamic Units Dropdown */}
@@ -446,8 +447,8 @@ export default function AdminProducts() {
                   disabled={s.isMandatory}
                   title={s.isMandatory ? "Mandatory specification - cannot be deleted" : "Remove specification"}
                   className={`p-2 rounded-lg transition-colors ${s.isMandatory
-                      ? "text-gray-400 cursor-not-allowed opacity-50"
-                      : "text-red-400 hover:bg-red-500/10"
+                    ? "text-gray-400 cursor-not-allowed opacity-50"
+                    : "text-red-400 hover:bg-red-500/10"
                     }`}
                 >
                   <Trash2 size={16} />
