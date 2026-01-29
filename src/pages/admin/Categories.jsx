@@ -6,7 +6,7 @@ import {
   updateCategory,
   deleteCategory,
 } from "../../api/category.api";
-import { Layers, Pencil, Trash2, X, Loader2, Search } from "lucide-react";
+import { Layers, Pencil, Trash2, X, Loader2, Search, ArrowDownUp } from "lucide-react";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
@@ -92,14 +92,25 @@ export default function AdminCategories() {
     setForm({ ...form, [type]: updated });
   };
 
+  const toggleSpecType = (sourceType, index) => {
+    const targetType = sourceType === 'mandatory' ? 'optional' : 'mandatory';
+    const specToMove = form[sourceType][index];
+
+    setForm({
+      ...form,
+      [sourceType]: form[sourceType].filter((_, i) => i !== index),
+      [targetType]: [...form[targetType], specToMove]
+    });
+  };
+
   /* ===============================
      CREATE / UPDATE CATEGORY
      =============================== */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const name = form.categoryName.trim();
-    const description = form.description.trim();
+    const name = (form.categoryName || "").trim();
+    const description = (form.description || "").trim();
 
     // /////////////////
 
@@ -129,8 +140,8 @@ export default function AdminCategories() {
       formData.append("categoryName", name);
       formData.append("description", description);
 
-      const filteredMandatory = form.mandatory.filter(s => s.name.trim() !== "");
-      const filteredOptional = form.optional.filter(s => s.name.trim() !== "");
+      const filteredMandatory = (form.mandatory || []).filter(s => (s.name || "").trim() !== "");
+      const filteredOptional = (form.optional || []).filter(s => (s.name || "").trim() !== "");
 
       formData.append("mandatory", JSON.stringify(filteredMandatory));
       formData.append("optional", JSON.stringify(filteredOptional));
@@ -313,14 +324,24 @@ export default function AdminCategories() {
                     <Trash2 size={16} />
                   </button>
 
-                  <div className="max-w-md">
-                    <label className="text-[10px] font-bold text-white/40 uppercase mb-1 block tracking-wider">Spec Name (e.g. Storage, RAM)</label>
-                    <input
-                      className="glass-input !py-1.5 text-sm"
-                      placeholder="Specification Name"
-                      value={spec.name}
-                      onChange={(e) => updateSpecName('mandatory', specIdx, e.target.value)}
-                    />
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1">
+                      <label className="text-[10px] font-bold text-white/40 uppercase mb-1 block tracking-wider">Spec Name (e.g. Storage, RAM)</label>
+                      <input
+                        className="glass-input !py-1.5 text-sm"
+                        placeholder="Specification Name"
+                        value={spec.name}
+                        onChange={(e) => updateSpecName('mandatory', specIdx, e.target.value)}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleSpecType('mandatory', specIdx)}
+                      className="p-2 bg-white/5 border border-white/20 rounded-xl text-white/40 hover:text-blue-400 hover:border-blue-500/50 transition-all mb-0.5"
+                      title="Move to Optional"
+                    >
+                      <ArrowDownUp size={16} />
+                    </button>
                   </div>
 
                   <div className="space-y-2">
@@ -385,14 +406,24 @@ export default function AdminCategories() {
                     <Trash2 size={16} />
                   </button>
 
-                  <div className="max-w-md">
-                    <label className="text-[10px] font-bold text-white/40 uppercase mb-1 block tracking-wider">Spec Name (e.g. Camera, Battery)</label>
-                    <input
-                      className="glass-input !py-1.5 text-sm"
-                      placeholder="Specification Name"
-                      value={spec.name}
-                      onChange={(e) => updateSpecName('optional', specIdx, e.target.value)}
-                    />
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1">
+                      <label className="text-[10px] font-bold text-white/40 uppercase mb-1 block tracking-wider">Spec Name (e.g. Camera, Battery)</label>
+                      <input
+                        className="glass-input !py-1.5 text-sm"
+                        placeholder="Specification Name"
+                        value={spec.name}
+                        onChange={(e) => updateSpecName('optional', specIdx, e.target.value)}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleSpecType('optional', specIdx)}
+                      className="p-2 bg-white/5 border border-white/20 rounded-xl text-white/40 hover:text-red-400 hover:border-red-500/50 transition-all mb-0.5"
+                      title="Move to Mandatory"
+                    >
+                      <ArrowDownUp size={16} />
+                    </button>
                   </div>
 
                   <div className="space-y-2">
