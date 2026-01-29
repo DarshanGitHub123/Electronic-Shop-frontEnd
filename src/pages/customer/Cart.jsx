@@ -337,7 +337,7 @@ export default function Cart() {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm font-bold">
                   <span className="text-gray-400 uppercase tracking-widest">Total MRP</span>
-                  <span className="text-gray-900 dark:text-white line-through opacity-50">₹{totals.mrp.toFixed(2)}</span>
+                  <span className="text-gray-900 dark:text-white">₹{totals.mrp.toFixed(2)}</span>
                 </div>
 
                 <div className="flex justify-between text-sm font-bold">
@@ -349,7 +349,11 @@ export default function Cart() {
 
                 <div className="flex justify-between text-sm font-bold">
                   <span className="text-gray-400 uppercase tracking-widest">Calculated Tax</span>
-                  <span className="text-gray-900 dark:text-white">₹{totals.tax.toFixed(2)} <span className="text-[8px] opacity-60">(Included)</span></span>
+                  <span className="text-gray-900 dark:text-white">(₹{totals.tax.toFixed(2)})<span className="text-[8px] opacity-60">(Included)</span></span>
+                </div>
+                <div className="flex justify-between text-sm font-bold">
+                  <span className="text-gray-400 uppercase tracking-widest">Total</span>
+                  <span className="text-gray-900 dark:text-white">₹{totals.mrp.toFixed(2) - totals.discount.toFixed(2)}</span>
                 </div>
 
                 <div className="flex justify-between text-sm font-bold">
