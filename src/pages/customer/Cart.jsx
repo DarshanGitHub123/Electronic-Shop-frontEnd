@@ -279,7 +279,7 @@ export default function Cart() {
                             )}
                           </div>
                           <p className="text-[10px] font-medium text-gray-500">
-                            + ₹{((Number(item.product?.price || 0) * (1 - Number(item.product?.discount || 0) / 100) * Number(item.product?.tax || 0) / 100)).toFixed(2)} Tax per unit ({item.product?.tax}%)
+                            + ₹{(Number(item.product?.price || 0) * Number(item.product?.discount || 0)) / 100} Tax per unit (included) ({item.product?.tax}%)
                           </p>
                           {isItemOutOfStock && (
                             <span className="text-[10px] font-black text-red-600 uppercase tracking-widest bg-red-100 px-2 py-0.5 rounded-md inline-block mt-1">
@@ -358,7 +358,7 @@ export default function Cart() {
 
                 <div className="flex justify-between text-sm font-bold">
                   <span className="text-gray-400 uppercase tracking-widest">Delivery</span>
-                  <span className={deliveryFee === 0 ? "text-green-600" : "text-gray-900"}>
+                  <span className={deliveryFee === 0 ? "text-white" : "text-white"}>
                     {deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}
                   </span>
                 </div>
