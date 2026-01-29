@@ -1,7 +1,8 @@
 import { useCart } from "../../context/CartContext";
 import { createOrder, createRazorpayOrder, verifyRazorpayPayment } from "../../api/order.api";
+import { validateCoupon } from "../../api/coupons.api";
 import { Link } from "react-router-dom";
-import { Plus, Minus, Trash2, ShoppingBag, Tag, Info, ShieldCheck, Truck } from "lucide-react";
+import { Plus, Minus, Trash2, ShoppingBag, Tag, Info, ShieldCheck, Truck, X } from "lucide-react";
 import { toast } from "react-toastify";
 import { useState, useEffect } from "react";
 import CheckoutModal from "../../components/customer/CheckoutModal";
@@ -9,6 +10,10 @@ import CheckoutModal from "../../components/customer/CheckoutModal";
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [isApplying, setIsApplying] = useState(false);
 
   // Load Razorpay script
   useEffect(() => {
@@ -53,7 +58,46 @@ export default function Cart() {
   }, { mrp: 0, discount: 0, tax: 0, total: 0 });
 
   const deliveryFee = totals.total > 0 ? (totals.total > 500 ? 0 : 40) : 0;
-  const grandTotal = totals.total + deliveryFee;
+
+  // Calculate coupon discount
+  const currentTotal = totals.total;
+  const finalCouponDiscount = appliedCoupon ? (currentTotal * appliedCoupon.discount) / 100 : 0;
+
+  const grandTotal = totals.total - finalCouponDiscount + deliveryFee;
+
+  // Auto-remove coupon if total drops below minPrice
+  useEffect(() => {
+    if (appliedCoupon && totals.total < appliedCoupon.minPrice) {
+      setAppliedCoupon(null);
+      setCouponDiscount(0);
+      toast.info("Coupon removed as total is now below minimum requirement");
+    }
+  }, [totals.total, appliedCoupon]);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setIsApplying(true);
+    try {
+      const { data } = await validateCoupon({
+        code: couponCode,
+        amount: totals.total
+      });
+      if (data.success) {
+        setAppliedCoupon({
+          code: couponCode.toUpperCase(),
+          discount: data.discount,
+          minPrice: data.minPrice // I should probably return minPrice from backend too, or just use it from validation
+        });
+        toast.success(data.message);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to apply coupon");
+      setAppliedCoupon(null);
+      setCouponDiscount(0);
+    } finally {
+      setIsApplying(false);
+    }
+  };
 
   // Aggregate Recommended Products (Unique)
   const recommendations = Array.from(new Set(
@@ -112,6 +156,8 @@ export default function Cart() {
             postalCode: checkoutData.postalCode,
           },
           customizationDescription: checkoutData.customizationDescription,
+          couponCode: appliedCoupon?.code,
+          couponDiscount: finalCouponDiscount,
           paymentDetails: {
             method: "COD",
             status: "Pending",
@@ -164,6 +210,8 @@ export default function Cart() {
                     postalCode: checkoutData.postalCode,
                   },
                   customizationDescription: checkoutData.customizationDescription,
+                  couponCode: appliedCoupon?.code,
+                  couponDiscount: finalCouponDiscount,
                 },
               });
 
@@ -347,10 +395,19 @@ export default function Cart() {
                   <span className="text-green-600">-₹{totals.discount.toFixed(2)}</span>
                 </div>
 
-                <div className="flex justify-between text-sm font-bold">
+                {appliedCoupon && (
+                  <div className="flex justify-between text-sm font-bold">
+                    <span className="text-purple-600 flex items-center gap-1 uppercase tracking-widest">
+                      <Tag size={14} /> Coupon ({appliedCoupon.code})
+                    </span>
+                    <span className="text-purple-600">-₹{finalCouponDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+
+                {/* <div className="flex justify-between text-sm font-bold">
                   <span className="text-gray-400 uppercase tracking-widest">Calculated Tax</span>
                   <span className="text-gray-900 dark:text-white">(₹{totals.tax.toFixed(2)})<span className="text-[8px] opacity-60">(Included)</span></span>
-                </div>
+                </div> */}
                 <div className="flex justify-between text-sm font-bold">
                   <span className="text-gray-400 uppercase tracking-widest">Total</span>
                   <span className="text-gray-900 dark:text-white">₹{totals.mrp.toFixed(2) - totals.discount.toFixed(2)}</span>
@@ -369,6 +426,39 @@ export default function Cart() {
                     <p className="text-[10px] font-bold text-blue-700 uppercase tracking-tight leading-tight">
                       Add ₹{(500 - totals.total).toFixed(2)} more for FREE delivery!
                     </p>
+                  </div>
+                )}
+
+                {/* Coupon Input */}
+                {!appliedCoupon ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Coupon Code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      className="flex-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+                    />
+                    <button
+                      onClick={handleApplyCoupon}
+                      disabled={isApplying || !couponCode.trim()}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all disabled:opacity-50"
+                    >
+                      {isApplying ? "..." : "Apply"}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/30 rounded-xl px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <Tag className="w-4 h-4 text-purple-600" />
+                      <span className="text-[10px] font-black text-purple-700 uppercase tracking-widest">{appliedCoupon.code}</span>
+                    </div>
+                    <button
+                      onClick={() => setAppliedCoupon(null)}
+                      className="text-purple-400 hover:text-purple-600 transition-colors"
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
                 )}
               </div>
@@ -465,6 +555,7 @@ export default function Cart() {
         deliveryFee={deliveryFee.toFixed(2)}
         discount={(totals.discount).toFixed(2)}
         tax={totals.tax.toFixed(2)}
+        couponDiscount={finalCouponDiscount.toFixed(2)}
         total={grandTotal.toFixed(2)}
       />
     </div>

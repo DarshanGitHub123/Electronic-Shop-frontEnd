@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X, MapPin, CreditCard, Edit3, Tag } from "lucide-react";
 
-export default function CheckoutModal({ isOpen, onClose, onSubmit, itemTotal, deliveryFee, discount, tax, total }) {
+export default function CheckoutModal({ isOpen, onClose, onSubmit, itemTotal, deliveryFee, discount, tax, couponDiscount, total }) {
     const [formData, setFormData] = useState({
         addressLine1: "",
         addressLine2: "",
@@ -238,12 +238,18 @@ export default function CheckoutModal({ isOpen, onClose, onSubmit, itemTotal, de
                             </div>
 
                             <div className="flex justify-between items-center text-sm text-green-600">
-                                <span className="font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]">
-                                    <Tag className="w-3 h-3" />
-                                    Discount
-                                </span>
                                 <span className="font-bold">-₹{discount}</span>
                             </div>
+
+                            {couponDiscount > 0 && (
+                                <div className="flex justify-between items-center text-sm text-purple-600">
+                                    <span className="font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]">
+                                        <Tag className="w-3 h-3" />
+                                        Coupon Discount
+                                    </span>
+                                    <span className="font-bold">-₹{couponDiscount}</span>
+                                </div>
+                            )}
 
                             <div className="flex justify-between items-center text-sm text-gray-600">
                                 <span className="font-bold uppercase tracking-widest text-[10px]">Tax Included</span>

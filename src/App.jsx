@@ -28,6 +28,7 @@ import AdminUsers from "./pages/admin/Users";
 import Billings from "./pages/admin/Billings";
 import AdminCollections from "./pages/admin/Collections";
 import AdminBanners from "./pages/admin/Banners";
+import Coupons from "./pages/admin/Coupons";
 
 // Static Pages
 import HelpCenter from "./pages/static/HelpCenter";
@@ -72,6 +73,7 @@ function AppContent() {
         <Route path="billings" element={<Billings />} />
         <Route path="collections" element={<AdminCollections />} />
         <Route path="banners" element={<AdminBanners />} />
+        <Route path="coupons" element={<Coupons />} />
         <Route path="users" element={<AdminUsers />} />
       </Route>
 

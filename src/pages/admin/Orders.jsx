@@ -136,7 +136,7 @@ export default function AdminOrders() {
       <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 flex flex-col md:flex-row gap-4">
         <input
           type="text"
-          placeholder="Search by Serial Number or Phone"
+          placeholder="Search by Serial Number"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           className="flex-1 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none"
