@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X, MapPin, CreditCard, Edit3, Tag } from "lucide-react";
 
-export default function CheckoutModal({ isOpen, onClose, onSubmit, itemTotal, deliveryFee, discount, total }) {
+export default function CheckoutModal({ isOpen, onClose, onSubmit, itemTotal, deliveryFee, discount, tax, total }) {
     const [formData, setFormData] = useState({
         addressLine1: "",
         addressLine2: "",
@@ -233,23 +233,28 @@ export default function CheckoutModal({ isOpen, onClose, onSubmit, itemTotal, de
 
                         <div className="space-y-3">
                             <div className="flex justify-between items-center text-sm">
-                                <span className="text-gray-500 font-medium">Items Total</span>
-                                <span className="font-bold">₹{itemTotal}</span>
+                                <span className="text-gray-500 font-medium font-bold uppercase tracking-widest text-[10px]">Total MRP</span>
+                                <span className="font-bold opacity-50 line-through">₹{itemTotal}</span>
+                            </div>
+
+                            <div className="flex justify-between items-center text-sm text-green-600">
+                                <span className="font-bold flex items-center gap-2 uppercase tracking-widest text-[10px]">
+                                    <Tag className="w-3 h-3" />
+                                    Discount
+                                </span>
+                                <span className="font-bold">-₹{discount}</span>
+                            </div>
+
+                            <div className="flex justify-between items-center text-sm text-gray-600">
+                                <span className="font-bold uppercase tracking-widest text-[10px]">Tax Included</span>
+                                <span className="font-bold">₹{tax}</span>
                             </div>
 
                             <div className="flex justify-between items-center text-sm">
-                                <span className="text-gray-500 font-medium">Delivery Fee</span>
-                                <span className={`font-bold ${deliveryFee === 0 ? 'text-green-600' : ''}`}>
-                                    {deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}
+                                <span className="text-gray-500 font-medium uppercase tracking-widest text-[10px]">Delivery Fee</span>
+                                <span className={`font-bold ${Number(deliveryFee) === 0 ? 'text-green-600' : ''}`}>
+                                    {Number(deliveryFee) === 0 ? 'FREE' : `₹${deliveryFee}`}
                                 </span>
-                            </div>
-
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="text-green-600 font-bold flex items-center gap-2">
-                                    <Tag className="w-4 h-4" />
-                                    Extra Discount
-                                </span>
-                                <span className="font-bold text-green-600">-₹{discount}</span>
                             </div>
 
                             <div className="pt-3 mt-3 border-t border-gray-200 dark:border-slate-700 flex justify-between items-center">

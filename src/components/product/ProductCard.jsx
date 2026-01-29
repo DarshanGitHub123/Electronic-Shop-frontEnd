@@ -102,11 +102,11 @@ export default function ProductCard({ product }) {
           {/* Price Section */}
           <div className="flex items-center gap-2 mb-3">
             <span className="text-lg font-bold text-gray-900 dark:text-white">
-              ₹{product.price}
+              ₹{product.price - product.price * (discount / 100)}
             </span>
             {discount > 0 && (
               <span className="text-xs text-gray-400 line-through">
-                ₹{Math.floor(product.price * (1 + discount / 100))}
+                ₹{Math.floor(product.price)}
               </span>
             )}
           </div>

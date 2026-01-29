@@ -21,14 +21,48 @@ export default function Cart() {
     };
   }, []);
 
-  // Calculate totals
-  const itemTotal = cart.reduce((sum, item) => {
-    return sum + Number(item.product?.price || 0) * Number(item.quantity || 0);
-  }, 0);
+  // Calculate totals with MRP, Discount, and Tax
+  const totals = cart.reduce((acc, item) => {
+    const product = item.product || {};
+    const quantity = item.quantity || 0;
 
-  const deliveryFee = itemTotal > 0 ? (itemTotal > 500 ? 0 : 40) : 0;
-  const discount = Math.floor(itemTotal * 0.05); // 5% discount
-  const grandTotal = itemTotal + deliveryFee - discount;
+    // MRP (Original Price)
+    const mrp = Number(product.price || 0);
+    const itemTotalMRP = mrp * quantity;
+
+    // Discount on MRP
+    const discountPercent = Number(product.discount || 0);
+    const itemTotalDiscount = (itemTotalMRP * discountPercent) / 100;
+
+    // Price after discount
+    const priceAfterDiscount = itemTotalMRP - itemTotalDiscount;
+
+    // Tax on discounted price
+    const taxPercent = Number(product.tax || 0);
+    const itemTotalTax = (priceAfterDiscount * taxPercent) / 100;
+
+    // Total for this item (including tax)
+    const itemFinalTotal = priceAfterDiscount;
+
+    return {
+      mrp: acc.mrp + itemTotalMRP,
+      discount: acc.discount + itemTotalDiscount,
+      tax: acc.tax + itemTotalTax,
+      total: acc.total + itemFinalTotal
+    };
+  }, { mrp: 0, discount: 0, tax: 0, total: 0 });
+
+  const deliveryFee = totals.total > 0 ? (totals.total > 500 ? 0 : 40) : 0;
+  const grandTotal = totals.total + deliveryFee;
+
+  // Aggregate Recommended Products (Unique)
+  const recommendations = Array.from(new Set(
+    cart.flatMap(item => item.product?.recommendedProducts || [])
+      .filter(p => p && p._id) // Ensure it's populated
+  )).filter((p, index, self) =>
+    self.findIndex(t => t._id === p._id) === index && // Unique by ID
+    !cart.some(item => item.product?._id === p._id) // Not already in cart
+  );
 
   // Check if any item is out of stock
   const hasOutOfStockItems = cart.some(item => (item.product?.stock || 0) <= 0);
@@ -221,17 +255,34 @@ export default function Cart() {
                           <h3 className="font-bold text-gray-800 dark:text-white truncate uppercase tracking-tight">
                             {item.product?.name || "Product"}
                           </h3>
-                          <p className="text-lg font-black text-gray-900 dark:text-white shrink-0">
-                            ₹{(item.product?.price || 0) * item.quantity}
-                          </p>
+                          <div className="text-right">
+                            <p className="text-lg font-black text-gray-900 dark:text-white shrink-0">
+                              ₹{((Number(item.product?.price || 0) * (1 - Number(item.product?.discount || 0) / 100)) * item.quantity).toFixed(2)}
+                            </p>
+                            {item.product?.discount > 0 && (
+                              <p className="text-[10px] font-bold text-green-600">
+                                Saved ₹{((Number(item.product?.price || 0) * Number(item.product?.discount || 0) / 100) * item.quantity).toFixed(2)}
+                              </p>
+                            )}
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-2 mt-0.5 mb-3">
-                          <p className="text-xs font-bold text-gray-400">
-                            ₹{item.product?.price} each
+                        <div className="space-y-1 mt-1 mb-3">
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs font-bold text-gray-400 line-through">
+                              ₹{item.product?.price}
+                            </p>
+                            {item.product?.discount > 0 && (
+                              <span className="text-[10px] font-black text-green-600 uppercase bg-green-100 px-1.5 py-0.5 rounded">
+                                {item.product.discount}% OFF
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] font-medium text-gray-500">
+                            + ₹{((Number(item.product?.price || 0) * (1 - Number(item.product?.discount || 0) / 100) * Number(item.product?.tax || 0) / 100)).toFixed(2)} Tax per unit ({item.product?.tax}%)
                           </p>
                           {isItemOutOfStock && (
-                            <span className="text-[10px] font-black text-red-600 uppercase tracking-widest bg-red-100 px-2 py-0.5 rounded-md">
+                            <span className="text-[10px] font-black text-red-600 uppercase tracking-widest bg-red-100 px-2 py-0.5 rounded-md inline-block mt-1">
                               Currently Unavailable
                             </span>
                           )}
@@ -285,8 +336,20 @@ export default function Cart() {
 
               <div className="space-y-3">
                 <div className="flex justify-between text-sm font-bold">
-                  <span className="text-gray-400 uppercase tracking-widest">Subtotal</span>
-                  <span className="text-gray-900 dark:text-white">₹{itemTotal}</span>
+                  <span className="text-gray-400 uppercase tracking-widest">Total MRP</span>
+                  <span className="text-gray-900 dark:text-white line-through opacity-50">₹{totals.mrp.toFixed(2)}</span>
+                </div>
+
+                <div className="flex justify-between text-sm font-bold">
+                  <span className="text-green-600 flex items-center gap-1 uppercase tracking-widest">
+                    <Tag size={14} /> Total Discount
+                  </span>
+                  <span className="text-green-600">-₹{totals.discount.toFixed(2)}</span>
+                </div>
+
+                <div className="flex justify-between text-sm font-bold">
+                  <span className="text-gray-400 uppercase tracking-widest">Calculated Tax</span>
+                  <span className="text-gray-900 dark:text-white">₹{totals.tax.toFixed(2)} <span className="text-[8px] opacity-60">(Included)</span></span>
                 </div>
 
                 <div className="flex justify-between text-sm font-bold">
@@ -296,18 +359,11 @@ export default function Cart() {
                   </span>
                 </div>
 
-                <div className="flex justify-between text-sm font-bold">
-                  <span className="text-green-600 flex items-center gap-1 uppercase tracking-widest">
-                    <Tag size={14} /> Discount
-                  </span>
-                  <span className="text-green-600">-₹{discount}</span>
-                </div>
-
-                {itemTotal < 500 && itemTotal > 0 && (
+                {totals.total < 500 && totals.total > 0 && (
                   <div className="bg-blue-50 dark:bg-blue-900/10 rounded-2xl p-4 border border-blue-100 flex items-center gap-3">
                     <Truck size={20} className="text-blue-600" />
                     <p className="text-[10px] font-bold text-blue-700 uppercase tracking-tight leading-tight">
-                      Add ₹{500 - itemTotal} more for FREE delivery!
+                      Add ₹{(500 - totals.total).toFixed(2)} more for FREE delivery!
                     </p>
                   </div>
                 )}
@@ -316,10 +372,10 @@ export default function Cart() {
               <div className="border-t border-dashed border-gray-200 pt-4">
                 <div className="flex justify-between items-center mb-6">
                   <span className="text-base font-black text-gray-900 dark:text-white uppercase tracking-tighter">
-                    Grand Total
+                    Payable Amount
                   </span>
                   <span className="text-3xl font-black text-blue-600">
-                    ₹{grandTotal}
+                    ₹{grandTotal.toFixed(2)}
                   </span>
                 </div>
 
@@ -350,15 +406,62 @@ export default function Cart() {
         )}
       </div>
 
+      {/* Recommended Products */}
+      {recommendations.length > 0 && (
+        <div className="mt-16 space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
+              <Tag className="w-5 h-5 text-orange-600" />
+            </div>
+            <h3 className="text-xl font-black text-gray-800 dark:text-white uppercase tracking-tight">
+              You Might Also Like
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {recommendations.map((prod) => (
+              <Link
+                key={prod._id}
+                to={`/product/${prod._id}`}
+                className="bg-white dark:bg-slate-800 rounded-2xl p-3 border border-gray-100 dark:border-slate-700 hover:shadow-xl transition-all group"
+              >
+                <div className="aspect-square rounded-xl bg-gray-50 dark:bg-slate-900 mb-3 overflow-hidden relative">
+                  {prod.images?.[0] ? (
+                    <img src={prod.images[0]} alt={prod.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-3xl">📱</div>
+                  )}
+                  {prod.discount > 0 && (
+                    <div className="absolute top-2 left-2 bg-green-600 text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase">
+                      {prod.discount}% OFF
+                    </div>
+                  )}
+                </div>
+                <h4 className="font-bold text-xs text-gray-800 dark:text-white truncate mb-1">
+                  {prod.name}
+                </h4>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-black text-blue-600">₹{prod.price}</p>
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Plus size={14} />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Checkout Modal */}
       <CheckoutModal
         isOpen={showCheckout}
         onClose={() => setShowCheckout(false)}
         onSubmit={handleCheckout}
-        itemTotal={itemTotal}
-        deliveryFee={deliveryFee}
-        discount={discount}
-        total={grandTotal}
+        itemTotal={totals.mrp.toFixed(2)}
+        deliveryFee={deliveryFee.toFixed(2)}
+        discount={(totals.discount).toFixed(2)}
+        tax={totals.tax.toFixed(2)}
+        total={grandTotal.toFixed(2)}
       />
     </div>
   );
