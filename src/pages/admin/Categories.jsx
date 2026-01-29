@@ -12,9 +12,16 @@ export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
 
+  // 
+  const [image, setImage] = useState(null);
+  const [currentImage, setCurrentImage] = useState(null);
+  // 
+
+
   const [form, setForm] = useState({
     categoryName: "",
     description: "",
+
     mandatory: [{ name: "", units: [""] }],
     optional: [{ name: "", units: [""] }],
   });
@@ -94,6 +101,10 @@ export default function AdminCategories() {
     const name = form.categoryName.trim();
     const description = form.description.trim();
 
+    // /////////////////
+
+    // /////////////////
+
     if (!name || !description) {
       toast.warn("All fields are required");
       return;
@@ -114,11 +125,25 @@ export default function AdminCategories() {
     setLoading(true);
 
     try {
+      const formData = new FormData();
+      formData.append("categoryName", name);
+      formData.append("description", description);
+
+      const filteredMandatory = form.mandatory.filter(s => s.name.trim() !== "");
+      const filteredOptional = form.optional.filter(s => s.name.trim() !== "");
+
+      formData.append("mandatory", JSON.stringify(filteredMandatory));
+      formData.append("optional", JSON.stringify(filteredOptional));
+
+      if (image) {
+        formData.append("image", image);
+      }
+
       if (editId) {
-        await updateCategory(editId, form);
+        await updateCategory(editId, formData);
         toast.success("Category updated!");
       } else {
-        await createCategory(form);
+        await createCategory(formData);
         toast.success("Category created!");
       }
 
@@ -136,6 +161,8 @@ export default function AdminCategories() {
      =============================== */
   const editCategory = (category) => {
     setEditId(category._id);
+    setImage(null);
+    setCurrentImage(category.image);
     setForm({
       categoryName: category.categoryName,
       description: category.description,
@@ -176,6 +203,8 @@ export default function AdminCategories() {
      =============================== */
   const resetForm = () => {
     setEditId(null);
+    setImage(null);
+    setCurrentImage(null);
     setForm({
       categoryName: "",
       description: "",
@@ -229,6 +258,32 @@ export default function AdminCategories() {
           />
         </div>
 
+        {currentImage && (
+          <div className="space-y-2">
+            <label className="text-sm text-white/70">Current Image:</label>
+            <div className="relative">
+              <img
+                src={currentImage}
+                alt="Current collection"
+                className="w-full h-48 object-cover rounded-lg border-2 border-white/20"
+              />
+              <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                Current
+              </div>
+            </div>
+            <p className="text-xs text-white/60">
+              Upload a new image below to replace this one
+            </p>
+          </div>
+        )}
+
+        <input
+          type="file"
+          accept="image/*"
+          className="glass-input"
+          onChange={(e) => setImage(e.target.files[0])}
+        />
+        {/* ///////////////////////////////////////////////// */}
         {/* SPECIFICATIONS SECTION */}
         <div className="space-y-6 border-t border-white/10 pt-4">
 
