@@ -33,7 +33,7 @@ export default function AdminCategories() {
      LOAD CATEGORIES
      =============================== */
   const loadCategories = async () => {
-    const res = await getCategories();
+    const res = await getCategories("", true);
     setCategories(res.data);
   };
 

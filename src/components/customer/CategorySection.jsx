@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { getCategories } from "../../api/category.api";
+import { getProducts } from "../../api/product.api";
 import {
     Smartphone,
     Headphones,
@@ -35,19 +35,35 @@ const colors = [
     "from-indigo-500 to-indigo-600",
 ];
 
+import { useLocation } from "../../context/LocationContext";
+
 export default function CategorySection() {
     const [categories, setCategories] = useState([]);
     const scrollContainerRef = useRef(null);
+    const { pincode } = useLocation();
 
     useEffect(() => {
-        getCategories()
+        getProducts("", pincode)
             .then((res) => {
-                const allCategories = res.data || [];
-                const visibleCategories = allCategories.filter(cat => cat.showCustomer !== false);
+                const products = res.data || [];
+                // Extract unique categories from products
+                const categoryMap = new Map();
+                products.forEach(product => {
+                    const cat = product.category;
+                    if (cat && cat._id && !categoryMap.has(cat._id)) {
+                        // Apply showCustomer logic
+                        if (cat.showCustomer !== false) {
+                            categoryMap.set(cat._id, cat);
+                        }
+                    }
+                });
+
+                // Convert map back to array and sort if needed (optional, keeping original order if possible)
+                const visibleCategories = Array.from(categoryMap.values());
                 setCategories(visibleCategories);
             })
             .catch(console.error);
-    }, []);
+    }, [pincode]);
 
     useEffect(() => {
         const container = scrollContainerRef.current;

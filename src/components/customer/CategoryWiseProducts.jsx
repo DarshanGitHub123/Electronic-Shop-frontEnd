@@ -13,12 +13,19 @@ export default function CategoryWiseProducts() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const [categoriesRes, productsRes] = await Promise.all([
-                getCategories(),
-                getProducts("", pincode)
-            ]);
-            setCategories(categoriesRes.data);
-            setProducts(productsRes.data);
+            const res = await getProducts("", pincode);
+            const productsData = res.data || [];
+            setProducts(productsData);
+
+            // Derive unique categories from available products
+            const categoryMap = new Map();
+            productsData.forEach(product => {
+                const cat = product.category;
+                if (cat && cat._id && !categoryMap.has(cat._id)) {
+                    categoryMap.set(cat._id, cat);
+                }
+            });
+            setCategories(Array.from(categoryMap.values()));
         };
         fetchData();
     }, [pincode]);
@@ -27,7 +34,7 @@ export default function CategoryWiseProducts() {
     const getProductsByCategory = (categoryId) => {
         return products.filter(product =>
             product.category?._id === categoryId || product.category === categoryId
-        ).slice(0, 4); // Show only 4 products per category
+        ); // Show all products per category
     };
 
     if (categories.length === 0) return null;

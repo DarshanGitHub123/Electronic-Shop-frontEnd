@@ -3,8 +3,8 @@ import api from "./axios";
 /* ===============================
    READ
    =============================== */
-export const getCategories = () => {
-  return api.get("/categories");
+export const getCategories = (pincode = "", admin = false) => {
+  return api.get(`/categories?pincode=${pincode}&admin=${admin}`);
 };
 
 export const getCategoryById = (id) => {
