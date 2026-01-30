@@ -3,15 +3,18 @@ import { getCollections } from "../../api/collection.api";
 import { Link } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 
+import { useLocation } from "../../context/LocationContext";
+
 export default function CollectionsSection() {
     const [collections, setCollections] = useState([]);
+    const { pincode } = useLocation();
 
     useEffect(() => {
-        getCollections().then(res => {
+        getCollections(pincode).then(res => {
             const sorted = res.data.sort((a, b) => (a.rank || 999) - (b.rank || 999));
             setCollections(sorted);
         });
-    }, []);
+    }, [pincode]);
 
     if (collections.length === 0) return null;
 

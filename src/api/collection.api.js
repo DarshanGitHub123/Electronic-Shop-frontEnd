@@ -1,6 +1,7 @@
 import api from "./axios";
 
-export const getCollections = () => api.get("/collections");
+export const getCollections = (pincode = "", admin = false) =>
+  api.get(`/collections?pincode=${pincode}&admin=${admin}`);
 
 export const getCollectionById = (id) => api.get(`/collections/${id}`);
 
