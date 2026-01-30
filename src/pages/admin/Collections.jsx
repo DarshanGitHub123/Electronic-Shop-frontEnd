@@ -69,8 +69,8 @@ function SortableCollectionCard({ collection, index, onEdit, onDelete, onViewDet
         className="h-36 w-full object-cover rounded-lg mt-6"
         alt={collection.title}
       />
-      <h3 className="mt-2 font-semibold">{collection.title}</h3>
-      <p className="text-sm text-white/70 line-clamp-2">{collection.description}</p>
+      <h3 className="mt-2 font-semibold">{collection.title || "Untitled Collection"}</h3>
+      <p className="text-sm text-white/70 line-clamp-2">{collection.description || "No description"}</p>
 
       <div className="flex flex-wrap items-center gap-2 mt-4">
         <button
@@ -148,7 +148,7 @@ export default function Collections() {
       const fd = new FormData();
       fd.append("title", form.title || "");
       fd.append("description", form.description || "");
-      fd.append("products", JSON.stringify(selectedProducts));
+      fd.append("products", JSON.stringify(selectedProducts || []));
       if (image) fd.append("image", image);
 
       editId
@@ -176,8 +176,12 @@ export default function Collections() {
 
   const editCollection = (c) => {
     setEditId(c._id);
-    setForm({ title: c.title, description: c.description });
-    setSelectedProducts(c.products.map((p) => p._id));
+    setForm({
+      title: c.title || "",
+      description: c.description || ""
+    });
+    // Ensure we handle both populated and unpopulated products
+    setSelectedProducts((c.products || []).map((p) => (typeof p === "string" ? p : p._id)).filter(id => id));
     setCurrentImage(c.image);
     setImage(null);
   };
