@@ -110,6 +110,7 @@ export default function Collections() {
   const [form, setForm] = useState({
     title: "",
     description: "",
+    showText: true,
   });
 
   const sensors = useSensors(
@@ -148,6 +149,7 @@ export default function Collections() {
       const fd = new FormData();
       fd.append("title", form.title || "");
       fd.append("description", form.description || "");
+      fd.append("showText", form.showText);
       fd.append("products", JSON.stringify(selectedProducts || []));
       if (image) fd.append("image", image);
 
@@ -168,7 +170,7 @@ export default function Collections() {
 
   const reset = () => {
     setEditId(null);
-    setForm({ title: "", description: "" });
+    setForm({ title: "", description: "", showText: true });
     setSelectedProducts([]);
     setImage(null);
     setCurrentImage(null);
@@ -178,7 +180,8 @@ export default function Collections() {
     setEditId(c._id);
     setForm({
       title: c.title || "",
-      description: c.description || ""
+      description: c.description || "",
+      showText: c.showText ?? true,
     });
     // Ensure we handle both populated and unpopulated products
     setSelectedProducts((c.products || []).map((p) => (typeof p === "string" ? p : p._id)).filter(id => id));
@@ -243,7 +246,7 @@ export default function Collections() {
           placeholder="Collection Title"
           value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
-        // required
+          required
         />
 
         <textarea
@@ -252,7 +255,7 @@ export default function Collections() {
           rows="3"
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
-        // required
+          required
         />
 
         {/* CURRENT IMAGE PREVIEW */}
@@ -274,6 +277,21 @@ export default function Collections() {
             </p>
           </div>
         )}
+
+        <div className="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-2xl">
+          <label className="flex-1 text-sm font-medium text-white/80">Show Title & Description to Customers</label>
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, showText: !form.showText })}
+            className={`relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none ${form.showText ? 'bg-blue-600' : 'bg-gray-600'
+              }`}
+          >
+            <div
+              className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ${form.showText ? 'translate-x-6' : 'translate-x-0'
+                }`}
+            />
+          </button>
+        </div>
 
         <input
           type="file"

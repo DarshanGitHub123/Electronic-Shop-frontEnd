@@ -99,16 +99,20 @@ export default function CollectionDetail() {
 
                 {/* Content */}
                 <div className="absolute inset-0 flex flex-col justify-end p-8">
-                    <div className="flex items-center gap-3 mb-3">
-                        <Sparkles className="w-8 h-8 text-yellow-400" />
-                        <h1 className="text-4xl md:text-5xl font-bold text-white">
-                            {collection.title}
-                        </h1>
-                    </div>
-                    {collection.description && (
-                        <p className="text-lg text-white/90 max-w-2xl">
-                            {collection.description}
-                        </p>
+                    {collection.showText !== false && (
+                        <>
+                            <div className="flex items-center gap-3 mb-3">
+                                <Sparkles className="w-8 h-8 text-yellow-400" />
+                                <h1 className="text-4xl md:text-5xl font-bold text-white">
+                                    {collection.title}
+                                </h1>
+                            </div>
+                            {collection.description && (
+                                <p className="text-lg text-white/90 max-w-2xl">
+                                    {collection.description}
+                                </p>
+                            )}
+                        </>
                     )}
                     <p className="text-sm text-white/80 mt-2">
                         {products.length} {products.length === 1 ? 'product' : 'products'} in this collection
