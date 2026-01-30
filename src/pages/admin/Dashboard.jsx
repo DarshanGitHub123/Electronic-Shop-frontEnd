@@ -30,7 +30,7 @@ export default function Dashboard() {
       try {
         const [ordersRes, productsRes, usersRes] = await Promise.all([
           getAllOrders(),
-          getProducts(),
+          getProducts("", "", true),
           getAllUsers()
         ]);
 
