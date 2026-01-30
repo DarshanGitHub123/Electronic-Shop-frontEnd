@@ -128,7 +128,7 @@ export default function Collections() {
   const loadData = async () => {
     const [cRes, pRes] = await Promise.all([
       getCollections(),
-      getProducts(),
+      getProducts("", "", true),
     ]);
     // Sort collections by rank
     const sortedCollections = cRes.data.sort((a, b) => (a.rank || 1) - (b.rank || 1));
