@@ -41,7 +41,11 @@ export default function CategorySection() {
 
     useEffect(() => {
         getCategories()
-            .then((res) => setCategories(res.data || []))
+            .then((res) => {
+                const allCategories = res.data || [];
+                const visibleCategories = allCategories.filter(cat => cat.showCustomer !== false);
+                setCategories(visibleCategories);
+            })
             .catch(console.error);
     }, []);
 

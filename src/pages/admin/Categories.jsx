@@ -21,7 +21,7 @@ export default function AdminCategories() {
   const [form, setForm] = useState({
     categoryName: "",
     description: "",
-
+    showCustomer: true,
     mandatory: [{ name: "", units: [""] }],
     optional: [{ name: "", units: [""] }],
   });
@@ -139,6 +139,7 @@ export default function AdminCategories() {
       const formData = new FormData();
       formData.append("categoryName", name);
       formData.append("description", description);
+      formData.append("showCustomer", form.showCustomer);
 
       const filteredMandatory = (form.mandatory || []).filter(s => (s.name || "").trim() !== "");
       const filteredOptional = (form.optional || []).filter(s => (s.name || "").trim() !== "");
@@ -177,6 +178,7 @@ export default function AdminCategories() {
     setForm({
       categoryName: category.categoryName,
       description: category.description,
+      showCustomer: category.showCustomer ?? true,
       mandatory: (category.requirements?.mandatory?.length > 0)
         ? category.requirements.mandatory.map(s => ({
           _id: s._id,
@@ -219,6 +221,7 @@ export default function AdminCategories() {
     setForm({
       categoryName: "",
       description: "",
+      showCustomer: true,
       mandatory: [{ name: "", units: [""] }],
       optional: [{ name: "", units: [""] }]
     });
@@ -267,6 +270,23 @@ export default function AdminCategories() {
               setForm({ ...form, description: e.target.value })
             }
           />
+
+          <div className="flex items-center gap-3 bg-white/5 p-4 rounded-xl border border-white/10 transition-all hover:bg-white/10 group">
+            <div className={`p-2 rounded-lg ${form.showCustomer ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+              <Layers size={18} />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-sm font-medium text-white">Show to Customers</h4>
+              <p className="text-[10px] text-white/50">If enabled, this category will be visible on the home page.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setForm({ ...form, showCustomer: !form.showCustomer })}
+              className={`w-12 h-6 rounded-full relative transition-all duration-300 ${form.showCustomer ? 'bg-green-500' : 'bg-red-500/30'}`}
+            >
+              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${form.showCustomer ? 'left-7' : 'left-1'}`} />
+            </button>
+          </div>
         </div>
 
         {currentImage && (
@@ -524,6 +544,13 @@ export default function AdminCategories() {
                   </button>
                 </div>
               </div>
+
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${c.showCustomer !== false ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                  {c.showCustomer !== false ? '● Visible' : '○ Hidden'}
+                </span>
+              </div>
+
               <p className="text-sm text-white/70 italic leading-relaxed">
                 {c.description}
               </p>
@@ -538,6 +565,7 @@ export default function AdminCategories() {
               <tr>
                 <th className="p-4 text-left">Category</th>
                 <th className="p-4 text-left">Description</th>
+                <th className="p-4 text-center">Status</th>
                 <th className="p-4 text-right">Action</th>
               </tr>
             </thead>
@@ -553,6 +581,11 @@ export default function AdminCategories() {
                   </td>
                   <td className="p-4 text-white/80">
                     {c.description}
+                  </td>
+                  <td className="p-4 text-center">
+                    <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider inline-block ${c.showCustomer !== false ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                      {c.showCustomer !== false ? '● Visible' : '○ Hidden'}
+                    </span>
                   </td>
                   <td className="p-4 text-right">
                     <div className="inline-flex gap-3">
