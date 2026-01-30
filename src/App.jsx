@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { SearchProvider } from "./context/SearchContext";
+import { LocationProvider } from "./context/LocationContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -41,12 +42,14 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <CartProvider>
-          <SearchProvider>
-            <AppContent />
-            <ToastContainer position="bottom-right" theme="dark" />
-          </SearchProvider>
-        </CartProvider>
+        <LocationProvider>
+          <CartProvider>
+            <SearchProvider>
+              <AppContent />
+              <ToastContainer position="bottom-right" theme="dark" />
+            </SearchProvider>
+          </CartProvider>
+        </LocationProvider>
       </AuthProvider>
     </BrowserRouter>
   );

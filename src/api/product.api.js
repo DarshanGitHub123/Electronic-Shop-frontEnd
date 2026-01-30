@@ -1,7 +1,7 @@
 import api from "./axios";
 
-export const getProducts = (search = "") =>
-  api.get(`/products?search=${search}`);
+export const getProducts = (search = "", pincode = "", admin = false) =>
+  api.get(`/products?search=${search}&pincode=${pincode}&admin=${admin}`);
 
 export const getProductById = (id) =>
   api.get(`/products/${id}`);

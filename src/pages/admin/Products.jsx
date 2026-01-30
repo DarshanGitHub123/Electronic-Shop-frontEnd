@@ -31,7 +31,10 @@ export default function AdminProducts() {
     stock: "",
     tax: "",
     category: "",
+    deliverability: "PAN_INDIA",
   });
+  const [pincodes, setPincodes] = useState([]);
+  const [pincodeInput, setPincodeInput] = useState("");
 
   const [specs, setSpecs] = useState([{ key: "", value: "", unit: "" }]);
 
@@ -41,7 +44,7 @@ export default function AdminProducts() {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const productsRes = await getProducts();
+        const productsRes = await getProducts("", "", true);
         const categoriesRes = await getCategories();
         setAllProducts(productsRes.data);
         setCategories(categoriesRes.data);
@@ -163,6 +166,8 @@ export default function AdminProducts() {
         discount: Number(form.discount || 0), // ✅ SEND DISCOUNT
         stock: Number(form.stock),
         tax: Number(form.tax),
+        deliverability: form.deliverability || "PAN_INDIA",
+        availablePincodes: JSON.stringify(pincodes),
         specifications: JSON.stringify(specifications),
       }).forEach(([k, v]) => formData.append(k, v));
 
@@ -201,11 +206,14 @@ export default function AdminProducts() {
       stock: "",
       tax: "",
       category: "",
+      deliverability: "PAN_INDIA",
     });
     setImages([]);
     setOldImages([]);    // ✅ RESET OLD IMAGES
     setSpecs([{ key: "", value: "", unit: "" }]);
     setRecommended([]);
+    setPincodes([]);
+    setPincodeInput("");
   };
 
   /* ===============================
@@ -222,6 +230,7 @@ export default function AdminProducts() {
       stock: p.stock,
       tax: p.tax ?? "",
       category: p.category?._id || p.category,
+      deliverability: p.deliverability || "PAN_INDIA",
     });
 
     setOldImages(p.images || []);       // ✅ PREVIEW OLD IMAGES
@@ -231,6 +240,7 @@ export default function AdminProducts() {
         typeof rp === "string" ? rp : rp._id
       )
     );
+    setPincodes(p.availablePincodes || []);
 
     // Reconstruct specs with value/unit logic if possible, or just raw
     const specArray = Object.entries(p.specifications || {}).map(
@@ -337,7 +347,6 @@ export default function AdminProducts() {
           />
         </div>
 
-        {/* CATEGORY */}
         <select
           className="glass-input bg-white/15 text-white border border-white/30"
           value={form.category}
@@ -357,6 +366,77 @@ export default function AdminProducts() {
             </option>
           ))}
         </select>
+
+        {/* DELIVERABILITY */}
+        <div className="space-y-4">
+          <label className="text-sm font-medium text-white/80">Deliverability</label>
+          <select
+            className="glass-input bg-white/15 text-white border border-white/30"
+            value={form.deliverability}
+            onChange={(e) => setForm({ ...form, deliverability: e.target.value })}
+            required
+          >
+            <option value="PAN_INDIA" className="bg-gray-900 text-white text-sm">PAN INDIA</option>
+            <option value="SELECTED_PINCODES" className="bg-gray-900 text-white text-sm">Only Selected Pin Codes</option>
+          </select>
+
+          {form.deliverability === "SELECTED_PINCODES" && (
+            <div className="space-y-3 p-4 bg-white/5 border border-white/10 rounded-2xl animate-in fade-in slide-in-from-top-2">
+              <label className="text-xs font-bold text-white/50 uppercase tracking-widest">Available Pincodes</label>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  className="glass-input !py-2 text-sm flex-1"
+                  placeholder="Enter Pincode"
+                  value={pincodeInput}
+                  onChange={(e) => setPincodeInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const trimmed = pincodeInput.trim();
+                      if (trimmed && !pincodes.includes(trimmed)) {
+                        setPincodes([...pincodes, trimmed]);
+                        setPincodeInput("");
+                      }
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const trimmed = pincodeInput.trim();
+                    if (trimmed && !pincodes.includes(trimmed)) {
+                      setPincodes([...pincodes, trimmed]);
+                      setPincodeInput("");
+                    }
+                  }}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all"
+                >
+                  Add
+                </button>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {pincodes.map((pin) => (
+                  <span key={pin} className="flex items-center gap-2 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-3 py-1 rounded-full text-[10px] font-bold">
+                    {pin}
+                    <button
+                      type="button"
+                      onClick={() => setPincodes(pincodes.filter((p) => p !== pin))}
+                      className="hover:text-red-400 transition-colors"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+                {pincodes.length === 0 && (
+                  <p className="text-[10px] text-white/30 italic">No pincodes added yet.</p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* IMAGES */}
         <div className="space-y-4">
@@ -645,6 +725,6 @@ export default function AdminProducts() {
           </>
         )}
       </div>
-    </div>
+    </div >
   );
 }

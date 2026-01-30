@@ -4,12 +4,14 @@ import { getCollections } from "../../api/collection.api";
 import { getProducts } from "../../api/product.api";
 import ProductCard from "../../components/product/ProductCard";
 import { Sparkles, Package } from "lucide-react";
+import { useLocation } from "../../context/LocationContext";
 
 export default function CollectionDetail() {
     const { id } = useParams();
     const [collection, setCollection] = useState(null);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { pincode } = useLocation();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -29,8 +31,8 @@ export default function CollectionDetail() {
 
                 setCollection(currentCollection);
 
-                // Fetch all products
-                const productsRes = await getProducts();
+                // Fetch products filtered by pincode
+                const productsRes = await getProducts("", pincode);
 
                 // Filter products that are in this collection's products array
                 const collectionProductIds = currentCollection.products.map(p =>
@@ -54,7 +56,7 @@ export default function CollectionDetail() {
         if (id) {
             fetchData();
         }
-    }, [id]);
+    }, [id, pincode]);
 
     if (loading) {
         return (

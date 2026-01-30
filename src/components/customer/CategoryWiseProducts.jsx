@@ -2,24 +2,26 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getCategories } from "../../api/category.api";
 import { getProducts } from "../../api/product.api";
+import { useLocation } from "../../context/LocationContext";
 import ProductCard from "../product/ProductCard";
 import { ChevronRight } from "lucide-react";
 
 export default function CategoryWiseProducts() {
     const [categories, setCategories] = useState([]);
     const [products, setProducts] = useState([]);
+    const { pincode } = useLocation();
 
     useEffect(() => {
         const fetchData = async () => {
             const [categoriesRes, productsRes] = await Promise.all([
                 getCategories(),
-                getProducts()
+                getProducts("", pincode)
             ]);
             setCategories(categoriesRes.data);
             setProducts(productsRes.data);
         };
         fetchData();
-    }, []);
+    }, [pincode]);
 
     // Group products by category
     const getProductsByCategory = (categoryId) => {

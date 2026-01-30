@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getCategoryById } from "../../api/category.api";
 import { getProducts } from "../../api/product.api";
+import { useLocation } from "../../context/LocationContext";
 import ProductCard from "../../components/product/ProductCard";
 import { ChevronLeft, LayoutGrid, Package } from "lucide-react";
 
@@ -10,6 +11,7 @@ export default function CategoryDetail() {
     const [category, setCategory] = useState(null);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { pincode } = useLocation();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -17,7 +19,7 @@ export default function CategoryDetail() {
                 setLoading(true);
                 const [catRes, prodRes] = await Promise.all([
                     getCategoryById(id),
-                    getProducts(),
+                    getProducts("", pincode),
                 ]);
                 setCategory(catRes.data);
 
@@ -33,7 +35,7 @@ export default function CategoryDetail() {
             }
         };
         fetchData();
-    }, [id]);
+    }, [id, pincode]);
 
     if (loading) {
         return (
